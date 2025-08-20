@@ -1,0 +1,36 @@
+---
+Name: footer-config
+After: 'framework/*'
+---
+SilverStripe\SiteConfig\SiteConfig:
+  extensions:
+    - FooterSiteConfigExtension
+
+# Optional: Set default records
+FooterSocialMedia:
+  default_records:
+    facebook:
+      Title: 'Facebook'
+      IconClass: 'fab fa-facebook-f'
+      AltText: 'Facebook Page'
+      SortOrder: 1
+    instagram:
+      Title: 'Instagram' 
+      IconClass: 'fab fa-instagram'
+      AltText: 'Instagram Profile'
+      SortOrder: 2
+    twitter:
+      Title: 'Twitter'
+      IconClass: 'fab fa-twitter'
+      AltText: 'Twitter Profile'
+      SortOrder: 3
+    linkedin:
+      Title: 'LinkedIn'
+      IconClass: 'fab fa-linkedin-in'
+      AltText: 'LinkedIn Profile'
+      SortOrder: 4
+    youtube:
+      Title: 'YouTube'
+      IconClass: 'fab fa-youtube'
+      AltText: 'YouTube Channel'
+      SortOrder: 5

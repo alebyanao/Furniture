@@ -1,0 +1,263 @@
+<?php
+
+namespace App\Page;
+
+use App\Models\HeroBanner;
+use PageController;
+use SilverStripe\ORM\ArrayList;
+use App\Models\FeatureItem;
+use PromoCard;
+use Product;
+use Category;
+
+class HomePageController extends PageController
+{
+    // ===================== PRODUCT METHODS BERDASARKAN KATEGORI ADMIN =====================
+
+    /**
+     * Get "Best Sellers" products - berdasarkan kategori admin
+     */
+    public function getBestSellersProducts()
+    {
+        $category = Category::get()->filter('Name', 'Best Sellers')->first();
+        if ($category && $category->Products()->count() > 0) {
+            return $category->Products()
+                ->filter('Stock:GreaterThan', 0)
+                ->sort('Created', 'DESC')
+                ->limit(6);
+        }
+        // Fallback jika kategori tidak ada
+        return Product::get()
+            ->filter('Stock:GreaterThan', 0)
+            ->sort('ReviewCount', 'DESC')
+            ->limit(6);
+    }
+
+    /**
+     * Get "Featured Product" products - berdasarkan kategori admin  
+     */
+    public function getFeaturedProducts()
+    {
+        $category = Category::get()->filter('Name', 'Featured Product')->first();
+        if ($category && $category->Products()->count() > 0) {
+            return $category->Products()
+                ->filter('Stock:GreaterThan', 0)
+                ->sort('Created', 'DESC')
+                ->limit(4);
+        }
+        // Fallback
+        return Product::get()
+            ->filter('Stock:GreaterThan', 0)
+            ->limit(4);
+    }
+
+    /**
+     * Get "Promo" products - berdasarkan kategori admin
+     */
+    public function getPromoProducts()
+    {
+        $category = Category::get()->filter('Name', 'Promo')->first();
+        if ($category && $category->Products()->count() > 0) {
+            return $category->Products()
+                ->filter('Stock:GreaterThan', 0)
+                ->sort('Discount', 'DESC')
+                ->limit(4);
+        }
+        // Fallback ke produk dengan discount
+        return Product::get()
+            ->filter('Discount:GreaterThan', 0)
+            ->filter('Stock:GreaterThan', 0)
+            ->limit(4);
+    }
+
+    /**
+     * Get "Trendy Collection" products - berdasarkan kategori admin
+     */
+    public function getTrendyProducts()
+    {
+        $category = Category::get()->filter('Name', 'Trendy Collection')->first();
+        if ($category && $category->Products()->count() > 0) {
+            return $category->Products()
+                ->filter('Stock:GreaterThan', 0)
+                ->sort('Created', 'DESC')
+                ->limit(8);
+        }
+        // Fallback ke produk terbaru
+        return Product::get()
+            ->filter('Stock:GreaterThan', 0)
+            ->sort('Created', 'DESC')
+            ->limit(8);
+    }
+
+    /**
+     * Get products berdasarkan nama kategori spesifik
+     */
+    public function getProductsByCategoryName($categoryName, $limit = 4)
+    {
+        $category = Category::get()->filter('Name', $categoryName)->first();
+        if ($category) {
+            return $category->Products()
+                ->filter('Stock:GreaterThan', 0)
+                ->limit($limit);
+        }
+        return null;
+    }
+
+    /**
+     * Check apakah kategori memiliki produk
+     */
+    public function hasBestSellers()
+    {
+        $products = $this->getBestSellersProducts();
+        return $products && $products->count() > 0;
+    }
+
+    public function hasFeaturedProducts()
+    {
+        $products = $this->getFeaturedProducts();
+        return $products && $products->count() > 0;
+    }
+
+    public function hasPromoProducts()
+    {
+        $products = $this->getPromoProducts();
+        return $products && $products->count() > 0;
+    }
+
+    public function hasTrendyProducts()
+    {
+        $products = $this->getTrendyProducts();
+        return $products && $products->count() > 0;
+    }
+
+    /**
+     * Get all active categories (untuk loop di template)
+     */
+    public function getActiveCategories()
+    {
+        return Category::get()->filter('IsActive', true);
+    }
+
+    /**
+     * Get products by category ID
+     */
+    public function getProductsByCategory($categoryID, $limit = 4)
+    {
+        return Product::get()
+            ->filter('Categories.ID', $categoryID)
+            ->filter('Stock:GreaterThan', 0)
+            ->limit($limit);
+    }
+
+    /**
+     * Check if we have products
+     */
+    public function hasProducts()
+    {
+        return Product::get()->count() > 0;
+    }
+
+    /**
+     * Get specific category by name
+     */
+    public function getBestSellersCategory()
+    {
+        return Category::get()->filter('Name', 'Best Sellers')->first();
+    }
+
+    public function getFeaturedCategory()
+    {
+        return Category::get()->filter('Name', 'Featured Product')->first();
+    }
+
+    public function getPromoCategory()
+    {
+        return Category::get()->filter('Name', 'Promo')->first();
+    }
+
+    public function getTrendyCategory()
+    {
+        return Category::get()->filter('Name', 'Trendy Collection')->first();
+    }
+
+    // ===================== HERO BANNER & FEATURE METHODS (EXISTING) =====================
+    
+    public function getHeroBanners()
+    {
+        if (!$this->dataRecord->getHeroBannerEnabled()) {
+            return null;
+        }
+        return HeroBanner::getActiveBanners();
+    }
+
+    public function hasHeroBanners()
+    {
+        if (!$this->dataRecord->getHeroBannerEnabled()) {
+            return false;
+        }
+        $banners = $this->getHeroBanners();
+        return $banners && $banners->count() > 0;
+    }
+
+    public function getFirstHeroBanner()
+    {
+        $banners = $this->getHeroBanners();
+        return $banners ? $banners->first() : null;
+    }
+
+    public function getAllHeroImages()
+    {
+        $banners = $this->getHeroBanners();
+        if (!$banners) {
+            return ArrayList::create();
+        }
+        
+        $allImages = ArrayList::create();
+        foreach ($banners as $banner) {
+            $images = $banner->getSortedHeroImages();
+            foreach ($images as $image) {
+                $allImages->push($image);
+            }
+        }
+        return $allImages;
+    }
+
+    public function getFeatureItems()
+    {
+        if (!$this->dataRecord->getFeaturesEnabled()) {
+            return null;
+        }
+        return FeatureItem::getActiveFeatures();
+    }
+
+    public function hasFeatureItems()
+    {
+        if (!$this->dataRecord->getFeaturesEnabled()) {
+            return false;
+        }
+        $features = $this->getFeatureItems();
+        return $features && $features->count() > 0;
+    }
+
+    public function getPromoCards()
+    {
+        return PromoCard::getActivePromoCards();
+    }
+
+    public function hasPromoCards()
+    {
+        $promoCards = $this->getPromoCards();
+        return $promoCards && $promoCards->count() > 0;
+    }
+
+    public function getTwoPromoCards()
+    {
+        return $this->getPromoCards()->limit(2);
+    }   
+
+    public function index()
+    {
+        return $this->renderWith(['HomePage', 'Page']);
+    }
+
+}
