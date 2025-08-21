@@ -182,5 +182,18 @@ class Product extends DataObject
         $categories = $this->Categories();
         return $categories->count() > 0 ? $categories->first()->Name : 'Uncategorized';
     }
+    
+    // Add this method to your existing Product.php class
+    
+    public function formatRupiahPublic($amount)
+    {
+        return number_format($amount, 0, ',', '.');
+    }
+    
+    // Add this method to handle the detail link
+    public function getDetailLink()
+    {
+        return '/product-detail/show/' . $this->ID;
+    }
 
 }

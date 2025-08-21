@@ -212,7 +212,7 @@
                     <div class="product-carousel-wrapper">
                         <% loop $FeaturedProducts %>
                         <div class="product-carousel-slide">
-                            <div class="product-card" onclick="window.location.href='$DetailLink'">
+                            <div class="product-card" onclick="window.location.href='$Top.Link(product)/$ID'">
                                 <div class="product-image-container position-relative" style="background-color: #fdf8ef; padding: 40px 20px; min-height: 350px;">
                                     <% if $hasDiscount %>
                                     <div class="discount-badge position-absolute" style="top: 15px; left: 15px; background-color: #c4965c; color: white; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold;">
@@ -293,7 +293,7 @@
                         <h2 class="fw-bold text-dark">Trendy Collection</h2>
                         <p class="text-muted">Latest trends in furniture design</p>
                     </div>
-                    <a href="/Product" class="btn btn-outline-secondary">View All</a>
+                    <a href="$BaseHref/shop" class="btn btn-primary">View All</a>
                 </div>
             </div>
         </div>
@@ -304,7 +304,7 @@
                     <div class="product-carousel-wrapper">
                         <% loop $TrendyProducts %>
                         <div class="product-carousel-slide">
-                            <div class="product-card" onclick="window.location.href='/product-detail/show/$ID'">
+                            <div class="product-card" onclick="window.location.href='$Top.Link(product)/$ID'">
                                 <div class="product-image-container position-relative" style="background-color: #fdf8ef; padding: 40px 20px; min-height: 350px;">
                                     <% if $hasDiscount %>
                                     <div class="discount-badge position-absolute" style="top: 15px; left: 15px; background-color: #c4965c; color: white; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold;">
@@ -391,7 +391,7 @@
                     <div class="product-carousel-wrapper">
                         <% loop $PromoProducts %>
                         <div class="product-carousel-slide">
-                            <div class="product-card" onclick="window.location.href='/product-detail/show/$ID'">
+                            <div class="product-card" onclick="window.location.href='$Top.Link(product)/$ID'">
                                 <div class="product-image-container position-relative" style="background-color: #fdf8ef; padding: 40px 20px; min-height: 350px;">
                                     <% if $hasDiscount %>
                                     <div class="discount-badge position-absolute" style="top: 15px; left: 15px; background-color: #c4965c; color: white; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold;">
@@ -475,7 +475,7 @@
         <div class="row">
             <% loop $BestSellersProducts %>
             <div class="col-lg-3 col-md-4 col-sm-6 col-12 mb-4">
-                <div class="product-card" onclick="window.location.href='/product-detail/show/$ID'">
+                <div class="product-card" onclick="window.location.href='$Top.Link(product)/$ID'">
                     <div class="product-image-container position-relative" style="background-color: #fdf8ef; padding: 40px 20px 60px; min-height: 350px;">
                         <% if $hasDiscount %>
                         <div class="discount-badge position-absolute" style="top: 15px; left: 15px; background-color: #c4965c; color: white; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold;">
