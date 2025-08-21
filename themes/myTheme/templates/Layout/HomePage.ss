@@ -194,6 +194,7 @@
     </section>
     <% end_if %>
 
+
 <!-- FEATURED PRODUCTS SECTION (Carousel Layout) -->
 <% if $hasFeaturedProducts %>
 <section class="featured-products py-5">
@@ -292,12 +293,12 @@
                         <h2 class="fw-bold text-dark">Trendy Collection</h2>
                         <p class="text-muted">Latest trends in furniture design</p>
                     </div>
-                    <a href="/shop" class="btn btn-outline-secondary">View All</a>
+                    <a href="/Product" class="btn btn-outline-secondary">View All</a>
                 </div>
             </div>
         </div>
 
-        <div class="carousel-outer-container">
+        <div class="carousel-outer-container">  
             <div class="product-carousel-container position-relative">
                 <div class="product-carousel" id="trendy-carousel">
                     <div class="product-carousel-wrapper">

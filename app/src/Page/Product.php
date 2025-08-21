@@ -96,9 +96,9 @@ class Product extends DataObject
         return $this->Discount > 0 ? 'Rp ' . $this->formatRupiah($this->Discount) : 'No Discount';
     }
 
-    public function getDiscountPrice()
+        public function getDiscountPrice()
     {
-        return $this->Price - $this->Discount;
+        return max(0, $this->Price - $this->Discount);
     }
 
     public function getFormattedDiscountPrice()

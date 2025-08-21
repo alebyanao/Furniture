@@ -109,34 +109,7 @@ function initializeCarousels() {
             return;
         }
         
-        // Get visible slides count based on screen size
-        const visibleSlides = getVisibleSlidesCount();
-        console.log(`Visible slides for ${carouselId}: ${visibleSlides}`);
-        
-        // Check if navigation is needed
-        if (slides.length <= visibleSlides) {
-            console.log(`Hiding navigation for ${carouselId} - only ${slides.length} slides`);
-            container.classList.add('hide-nav');
-            stopAutoPlay(carouselId);
-        } else {
-            console.log(`Showing navigation for ${carouselId} - ${slides.length} slides`);
-            container.classList.remove('hide-nav');
-            
-            // Force show buttons for this carousel
-            const navButtons = container.querySelectorAll('.carousel-btn');
-            navButtons.forEach(btn => {
-                btn.style.display = 'flex';
-                btn.style.opacity = '1';
-                btn.style.visibility = 'visible';
-            });
-            
-            // Start auto-play for non-bestseller carousels
-            if (!carouselId.includes('bestseller')) {
-                console.log(`Starting auto-play for ${carouselId}`);
-                setTimeout(() => startAutoPlay(carouselId), 2000);
-            }
-        }
-        
+
         // Reset wrapper transform
         if (wrapper) {
             wrapper.style.transform = 'translateX(0%)';
