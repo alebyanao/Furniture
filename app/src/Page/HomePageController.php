@@ -5,6 +5,7 @@ namespace App\Page;
 use App\Models\HeroBanner;
 use PageController;
 use SilverStripe\ORM\ArrayList;
+use SilverStripe\Control\HTTPRequest;
 use App\Models\FeatureItem;
 use PromoCard;
 use Product;
@@ -12,7 +13,13 @@ use Category;
 
 class HomePageController extends PageController
 {
-    
+    private static $url_handlers = [
+    'product/$ID' => 'product'
+    ];
+    private static $allowed_actions = [
+        'product'
+    ]; 
+
     public function getBestSellersProducts()
     {
         $category = Category::get()->filter('Name', 'Best Sellers')->first();
@@ -91,9 +98,6 @@ class HomePageController extends PageController
         return null;
     }
 
-    /**
-     * Check apakah kategori memiliki produk
-     */
     public function hasBestSellers()
     {
         $products = $this->getBestSellersProducts();
@@ -246,6 +250,20 @@ class HomePageController extends PageController
     public function index()
     {
         return $this->renderWith(['HomePage', 'Page']);
+    }
+
+    public function product(HTTPRequest $request)
+    {
+        $id = $request->param('ID');
+        $product = Product::get()->byID($id);
+        
+        if (!$product) {
+            return $this->httpError(404, 'Product not found');
+        }
+
+        return $this->customise([
+            'Product' => $product
+        ])->renderWith(['ProductDetailShow', 'Page']);
     }
 
 }
