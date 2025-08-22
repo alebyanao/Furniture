@@ -130,7 +130,7 @@ class ProductPageController extends ContentController
         $review->CustomerEmail = $data['CustomerEmail'];
         $review->Rating = $data['Rating'];
         $review->Comment = $data['Comment'];
-        $review->IsApproved = false; // Needs admin approval
+        $review->IsApproved = false;
         $review->write();
 
         $form->sessionMessage(

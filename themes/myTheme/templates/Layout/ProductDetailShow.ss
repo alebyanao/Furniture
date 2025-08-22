@@ -72,10 +72,10 @@
 </div>
 
 
-<hr class="my-5">
+<div class="container">
+  <hr class="my-5">
 
 <div class="related-products mt-5">
-    <div class="container">
         <h3 class="fw-bold mb-4">Produk Lainnya</h3>
         <div class="row">
                     <% loop $Products %>

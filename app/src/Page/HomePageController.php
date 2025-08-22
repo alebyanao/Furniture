@@ -12,11 +12,7 @@ use Category;
 
 class HomePageController extends PageController
 {
-    // ===================== PRODUCT METHODS BERDASARKAN KATEGORI ADMIN =====================
-
-    /**
-     * Get "Best Sellers" products - berdasarkan kategori admin
-     */
+    
     public function getBestSellersProducts()
     {
         $category = Category::get()->filter('Name', 'Best Sellers')->first();
@@ -33,22 +29,18 @@ class HomePageController extends PageController
             ->limit(6);
     }
 
-    /**
-     * Get "Featured Product" products - berdasarkan kategori admin  
-     */
+    
     public function getFeaturedProducts()
     {
         $category = Category::get()->filter('Name', 'Featured Product')->first();
         if ($category && $category->Products()->count() > 0) {
             return $category->Products()
                 ->filter('Stock:GreaterThan', 0)
-                ->sort('Created', 'DESC')
-                ->limit(4);
+                ->sort('Created', 'DESC');
         }
         // Fallback
         return Product::get()
-            ->filter('Stock:GreaterThan', 0)
-            ->limit(4);
+            ->filter('Stock:GreaterThan', 0);
     }
 
     /**
@@ -60,14 +52,12 @@ class HomePageController extends PageController
         if ($category && $category->Products()->count() > 0) {
             return $category->Products()
                 ->filter('Stock:GreaterThan', 0)
-                ->sort('Discount', 'DESC')
-                ->limit(4);
+                ->sort('Discount', 'DESC');
         }
         // Fallback ke produk dengan discount
         return Product::get()
             ->filter('Discount:GreaterThan', 0)
-            ->filter('Stock:GreaterThan', 0)
-            ->limit(4);
+            ->filter('Stock:GreaterThan', 0);
     }
 
     /**
@@ -79,14 +69,12 @@ class HomePageController extends PageController
         if ($category && $category->Products()->count() > 0) {
             return $category->Products()
                 ->filter('Stock:GreaterThan', 0)
-                ->sort('Created', 'DESC')
-                ->limit(8);
+                ->sort('Created', 'DESC');
         }
         // Fallback ke produk terbaru
         return Product::get()
             ->filter('Stock:GreaterThan', 0)
-            ->sort('Created', 'DESC')
-            ->limit(8);
+            ->sort('Created', 'DESC');
     }
 
     /**

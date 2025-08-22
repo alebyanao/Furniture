@@ -189,11 +189,5 @@ class Product extends DataObject
     {
         return number_format($amount, 0, ',', '.');
     }
-    
-    // Add this method to handle the detail link
-    public function getDetailLink()
-    {
-        return '/product-detail/show/' . $this->ID;
-    }
 
 }
