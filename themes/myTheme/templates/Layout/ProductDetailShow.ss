@@ -123,7 +123,6 @@
             </div>
         </div>
         <% end_loop %>
-        
         <% if not $Products %>
         <div class="col-12">
             <div class="alert alert-info text-center">
