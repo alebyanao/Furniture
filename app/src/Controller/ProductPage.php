@@ -158,6 +158,8 @@ class ProductDetailController extends Controller
         'show/$ID' => 'show'
     ];
 
+
+
     public function show(HTTPRequest $request)
     {
         $productID = $request->param('ID');

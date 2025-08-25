@@ -1,81 +1,100 @@
-<div class="product-detail-container py-5">
+<div class="product-detail-container py-3 py-md-5">
   <div class="container">
     <% with $Product %>
-    <div class="row align-items-start">
+    <div class="row g-3 g-md-4 align-items-start">
       
       <!-- Product Image -->
-      <div class="col-lg-6 col-md-6 mb-4">
-        <div class="position-relative text-center p-4" style="background-color: #fdf8ef; border: 1px #c4965c">
+      <div class="col-12 col-md-6 col-lg-5">
+        <div class="position-relative text-center p-3 p-md-4 h-100 d-flex flex-column" style="background-color: #fdf8ef; border: 1px solid #c4965c; min-height: 300px;">
           <% if $hasDiscount %>
-          <div class="discount-badge position-absolute" style="top: 15px; left: 15px; background-color: #c4965c; color: white; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold;">
+          <div class="discount-badge position-absolute" style="top: 10px; left: 10px; background-color: #c4965c; color: white; padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; z-index: 2;">
             $DiscountPercentage Off
           </div>
           <% end_if %>  
 
-          <% if $Image %>
-          <img src="$Image.FitMax(500,500).URL" alt="$Name" class="img-fluid" style="max-height:400px;object-fit:contain;">
-          <% else %>
-          <img src="https://via.placeholder.com/500x500/f5f5f5/cccccc?text=No+Image" alt="$Name" class="img-fluid">
-          <% end_if %>
+          <div class="flex-grow-1 d-flex align-items-center justify-content-center">
+            <% if $Image %>
+            <img src="$Image.FitMax(500,500).URL" alt="$Name" class="img-fluid" style="max-height: 350px; max-width: 100%; object-fit: contain;">
+            <% else %>
+            <img src="https://via.placeholder.com/500x500/f5f5f5/cccccc?text=No+Image" alt="$Name" class="img-fluid" style="max-height: 350px; max-width: 100%; object-fit: contain;">
+            <% end_if %>
+          </div>
         </div>
       </div>
 
       <!-- Product Info -->
-      <div class="col-lg-6 col-md-6 ps-5">
-        <h1 class="fw-bold mb-3">$Name</h1>
+      <div class="col-12 col-md-6 col-lg-7">
+        <div class="h-100 d-flex flex-column px-0 px-md-3 px-lg-4">
+          
+          <!-- Product Title -->
+          <h1 class="fw-bold mb-3 fs-2 fs-md-1">$Name</h1>
 
-        <p class="mb-2"><strong>Stok :</strong> $Stock</p>
-        
-      <strong style="display: block; margin-bottom: 5px;">Deskripsi :</strong>
-        <div class="mb-4" style="max-height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; border-radius: 5px;">
-            <% if $Description %>
-                $Description
-            <% else %>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Pariatur fuga fugit aperiam maxime numquam dolore.
-            <% end_if %>
-        </div>
-
-        <!-- Price -->
-        <div class="mb-3">
-          <% if $hasDiscount %>
-            <span class="text-muted text-decoration-line-through me-2">$FormattedPrice</span>
-            <span class="fw-bold fs-4" style="color:#c4965c;">$FormattedDiscountPrice</span>
-          <% else %>
-            <span class="fw-bold fs-4" style="color:#c4965c;">$FormattedPrice</span>
-          <% end_if %>
-        </div>
-
-        <!-- Quantity + Cart -->
-        <% if $isInStock %>
-        <div class="d-flex align-items-center">
-          <strong class="me-5">Jumlah :</strong>
-                    
-          <div class="input-group me-2 rounded-pill border overflow-hidden" style="width: 130px;">
-            <button class="btn btn-outline-secondary border-0" type="button" onclick="changeQuantity(-1)">-</button>
-            <input type="number" id="quantity" class="form-control text-center border-0" value="1" min="1" max="99" readonly>
-            <button class="btn btn-outline-secondary border-0" type="button" onclick="changeQuantity(1)">+</button>
+          <!-- Stock Info -->
+          <p class="mb-2 fs-6"><strong>Stok :</strong> $Stock</p>
+          
+          <!-- Description -->
+          <div class="mb-2 mb-md-3 flex-grow-1">
+            <strong class="d-block mb-2">Deskripsi :</strong>
+            <div class="border rounded p-3" style="height: 170px; overflow-y: auto; background-color: #fafafa;">
+                <% if $Description %>
+                    $Description
+                <% else %>
+                    Lorem ipsum dolor sit amet consectetur adipisicing elit. Pariatur fuga fugit aperiam maxime numquam dolore. Architecto velit modi natus nisi eos sequi nesciunt ea nulla error provident laborum repellendus esse repudiandae eveniet perferendis ad, recusandae impedit voluptatem consequatur debitis.
+                <% end_if %>
+            </div>
           </div>
 
-          <button class="btn text-white fw-bold px-4 rounded-pill me-2" style="background-color: #c4965c;" onclick="addToCart()">keranjang</button>
-          <button class="btn btn-outline-secondary rounded-pill" title="Add to Wishlist"><i class="far fa-heart"></i></button>
-        </div>
-        <% else %>
-        <div class="alert alert-warning mt-3">
-          <strong>Out of Stock</strong> - This product is currently unavailable
-        </div>
-        <% end_if %>
+          <!-- Price -->
+          <div class="mb-3 mb-md-4">
+            <% if $hasDiscount %>
+              <div class="d-flex flex-wrap align-items-baseline">
+                <span class="text-muted text-decoration-line-through me-2 fs-6">$FormattedPrice</span>
+                <span class="fw-bold fs-4 fs-md-3" style="color:#c4965c;">$FormattedDiscountPrice</span>
+              </div>
+            <% else %>
+              <span class="fw-bold fs-4 fs-md-3" style="color:#c4965c;">$FormattedPrice</span>
+            <% end_if %>
+          </div>
 
+          <!-- Quantity Cart-->
+          <div class="mt-auto">
+            <% if $isInStock %>
+            <div class="d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-3">
+              <strong class="flex-shrink-0">Jumlah :</strong>
+              
+              <div class="d-flex align-items-center gap-2 flex-wrap w-100 w-sm-auto">
+                <div class="input-group rounded-pill border overflow-hidden flex-shrink-0" style="width: 120px; max-width: 120px;">
+                  <button class="btn btn-outline-secondary border-0 px-2" type="button" onclick="changeQuantity(-1)">-</button>
+                  <input type="number" id="quantity" class="form-control text-center border-0 px-1" value="1" min="1" max="99" readonly style="font-size: 14px;">
+                  <button class="btn btn-outline-secondary border-0 px-2" type="button" onclick="changeQuantity(1)">+</button>
+                </div>
+
+                <div class="d-flex gap-2">
+                  <button class="btn text-white fw-bold px-3 px-md-4 rounded-pill" style="background-color: #c4965c; font-size: 14px;" onclick="addToCart()">keranjang</button>
+                  <button class="btn btn-outline-secondary rounded-pill d-flex align-items-center justify-content-center" style="width: 40px; height: 38px;" title="Add to Wishlist">
+                    <i class="far fa-heart"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <% else %>
+            <div class="alert alert-warning mt-3 mb-0">
+              <strong>Out of Stock</strong> - This product is currently unavailable
+            </div>
+            <% end_if %>
+          </div>
+
+        </div>
       </div>
     </div>
     <% end_with %>
   </div>
 </div>
 
-
 <div class="container">
   <hr class="my-5">
 
-<div class="related-products mt-5">
+<div class="related-product mt-5">
         <h3 class="fw-bold mb-4">Produk Lainnya</h3>
         <div class="row">
         <% loop $Products %>
@@ -123,7 +142,7 @@
             </div>
         </div>
         <% end_loop %>
-        <% if not $Products %>
+        <% if not $Product %>
         <div class="col-12">
             <div class="alert alert-info text-center">
                 <h4>No Products Available</h4>
