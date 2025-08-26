@@ -23,370 +23,370 @@ class CartPageController extends ContentController
         'getTotalItems' => 'getTotalItemsAjax'
     ];
 
-    // public function init()
-    // {
-    //     parent::init();
+    public function init()
+    {
+        parent::init();
         
-    //     // Add CSS for cart styling
-    //     Requirements::customCSS('
-    //         .cart-container {
-    //             padding: 50px 0;
-    //         }
+        // Add CSS for cart styling
+        Requirements::customCSS('
+            .cart-container {
+                padding: 50px 0;
+            }
             
-    //         .cart-item {
-    //             background: white;
-    //             border: 1px solid #e0e0e0;
-    //             border-radius: 10px;
-    //             margin-bottom: 20px;
-    //             padding: 20px;
-    //             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    //         }
+            .cart-item {
+                background: white;
+                border: 1px solid #e0e0e0;
+                border-radius: 10px;
+                margin-bottom: 20px;
+                padding: 20px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
             
-    //         .cart-item-image {
-    //             background-color: #fdf8ef;
-    //             border-radius: 10px;
-    //             padding: 20px;
-    //             text-align: center;
-    //             max-height: 150px;
-    //             display: flex;
-    //             align-items: center;
-    //             justify-content: center;
-    //         }
+            .cart-item-image {
+                background-color: #fdf8ef;
+                border-radius: 10px;
+                padding: 20px;
+                text-align: center;
+                max-height: 150px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
             
-    //         .cart-item-image img {
-    //             max-width: 100%;
-    //             max-height: 120px;
-    //             object-fit: contain;
-    //         }
+            .cart-item-image img {
+                max-width: 100%;
+                max-height: 120px;
+                object-fit: contain;
+            }
             
-    //         .quantity-controls {
-    //             display: flex;
-    //             align-items: center;
-    //             border: 1px solid #ddd;
-    //             border-radius: 25px;
-    //             overflow: hidden;
-    //             width: fit-content;
-    //         }
+            .quantity-controls {
+                display: flex;
+                align-items: center;
+                border: 1px solid #ddd;
+                border-radius: 25px;
+                overflow: hidden;
+                width: fit-content;
+            }
             
-    //         .quantity-btn {
-    //             background: white;
-    //             border: none;
-    //             width: 35px;
-    //             height: 35px;
-    //             display: flex;
-    //             align-items: center;
-    //             justify-content: center;
-    //             cursor: pointer;
-    //             font-size: 16px;
-    //             color: #666;
-    //             transition: background-color 0.3s;
-    //         }
+            .quantity-btn {
+                background: white;
+                border: none;
+                width: 35px;
+                height: 35px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                font-size: 16px;
+                color: #666;
+                transition: background-color 0.3s;
+            }
             
-    //         .quantity-btn:hover {
-    //             background-color: #f0f0f0;
-    //         }
+            .quantity-btn:hover {
+                background-color: #f0f0f0;
+            }
             
-    //         .quantity-btn:disabled {
-    //             opacity: 0.5;
-    //             cursor: not-allowed;
-    //         }
+            .quantity-btn:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
             
-    //         .quantity-input {
-    //             border: none;
-    //             width: 50px;
-    //             height: 35px;
-    //             text-align: center;
-    //             font-size: 14px;
-    //             outline: none;
-    //             background: #f9f9f9;
-    //         }
+            .quantity-input {
+                border: none;
+                width: 50px;
+                height: 35px;
+                text-align: center;
+                font-size: 14px;
+                outline: none;
+                background: #f9f9f9;
+            }
             
-    //         .btn-remove {
-    //             background-color: #dc3545;
-    //             color: white;
-    //             border: none;
-    //             padding: 8px 15px;
-    //             border-radius: 20px;
-    //             font-size: 12px;
-    //             cursor: pointer;
-    //             transition: all 0.3s;
-    //         }
+            .btn-remove {
+                background-color: #dc3545;
+                color: white;
+                border: none;
+                padding: 8px 15px;
+                border-radius: 20px;
+                font-size: 12px;
+                cursor: pointer;
+                transition: all 0.3s;
+            }
             
-    //         .btn-remove:hover {
-    //             background-color: #c82333;
-    //         }
+            .btn-remove:hover {
+                background-color: #c82333;
+            }
             
-    //         .cart-summary {
-    //             background: #f8f9fa;
-    //             border-radius: 15px;
-    //             padding: 30px;
-    //             position: sticky;
-    //             top: 20px;
-    //         }
+            .cart-summary {
+                background: #f8f9fa;
+                border-radius: 15px;
+                padding: 30px;
+                position: sticky;
+                top: 20px;
+            }
             
-    //         .btn-checkout {
-    //             background-color: #c4965c;
-    //             color: white;
-    //             border: none;
-    //             padding: 15px 30px;
-    //             border-radius: 25px;
-    //             font-size: 16px;
-    //             font-weight: 600;
-    //             width: 100%;
-    //             cursor: pointer;
-    //             transition: all 0.3s;
-    //         }
+            .btn-checkout {
+                background-color: #c4965c;
+                color: white;
+                border: none;
+                padding: 15px 30px;
+                border-radius: 25px;
+                font-size: 16px;
+                font-weight: 600;
+                width: 100%;
+                cursor: pointer;
+                transition: all 0.3s;
+            }
             
-    //         .btn-checkout:hover {
-    //             background-color: #a67c4a;
-    //             transform: translateY(-2px);
-    //         }
+            .btn-checkout:hover {
+                background-color: #a67c4a;
+                transform: translateY(-2px);
+            }
             
-    //         .btn-continue {
-    //             background: white;
-    //             color: #c4965c;
-    //             border: 2px solid #c4965c;
-    //             padding: 12px 25px;
-    //             border-radius: 25px;
-    //             text-decoration: none;
-    //             font-weight: 600;
-    //             transition: all 0.3s;
-    //             display: inline-block;
-    //         }
+            .btn-continue {
+                background: white;
+                color: #c4965c;
+                border: 2px solid #c4965c;
+                padding: 12px 25px;
+                border-radius: 25px;
+                text-decoration: none;
+                font-weight: 600;
+                transition: all 0.3s;
+                display: inline-block;
+            }
             
-    //         .btn-continue:hover {
-    //             background-color: #c4965c;
-    //             color: white;
-    //             text-decoration: none;
-    //         }
+            .btn-continue:hover {
+                background-color: #c4965c;
+                color: white;
+                text-decoration: none;
+            }
             
-    //         .empty-cart {
-    //             text-align: center;
-    //             padding: 80px 20px;
-    //             color: #666;
-    //         }
+            .empty-cart {
+                text-align: center;
+                padding: 80px 20px;
+                color: #666;
+            }
             
-    //         .loading-overlay {
-    //             position: fixed;
-    //             top: 0;
-    //             left: 0;
-    //             width: 100%;
-    //             height: 100%;
-    //             background: rgba(255,255,255,0.8);
-    //             display: none;
-    //             align-items: center;
-    //             justify-content: center;
-    //             z-index: 9999;
-    //         }
+            .loading-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(255,255,255,0.8);
+                display: none;
+                align-items: center;
+                justify-content: center;
+                z-index: 9999;
+            }
             
-    //         .spinner {
-    //             border: 3px solid #f3f3f3;
-    //             border-top: 3px solid #c4965c;
-    //             border-radius: 50%;
-    //             width: 40px;
-    //             height: 40px;
-    //             animation: spin 1s linear infinite;
-    //         }
+            .spinner {
+                border: 3px solid #f3f3f3;
+                border-top: 3px solid #c4965c;
+                border-radius: 50%;
+                width: 40px;
+                height: 40px;
+                animation: spin 1s linear infinite;
+            }
             
-    //         @keyframes spin {
-    //             0% { transform: rotate(0deg); }
-    //             100% { transform: rotate(360deg); }
-    //         }
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
             
-    //         .alert {
-    //             padding: 15px;
-    //             margin-bottom: 20px;
-    //             border: 1px solid transparent;
-    //             border-radius: 10px;
-    //         }
+            .alert {
+                padding: 15px;
+                margin-bottom: 20px;
+                border: 1px solid transparent;
+                border-radius: 10px;
+            }
             
-    //         .alert-success {
-    //             color: #155724;
-    //             background-color: #d4edda;
-    //             border-color: #c3e6cb;
-    //         }
+            .alert-success {
+                color: #155724;
+                background-color: #d4edda;
+                border-color: #c3e6cb;
+            }
             
-    //         .alert-danger {
-    //             color: #721c24;
-    //             background-color: #f8d7da;
-    //             border-color: #f5c6cb;
-    //         }
-    //     ');
+            .alert-danger {
+                color: #721c24;
+                background-color: #f8d7da;
+                border-color: #f5c6cb;
+            }
+        ');
 
-    //     // Add JavaScript for AJAX functionality
-    //     Requirements::customScript('
-    //         class Cart {
-    //             constructor() {
-    //                 this.bindEvents();
-    //             }
+        // Add JavaScript for AJAX functionality
+        Requirements::customScript('
+            class Cart {
+                constructor() {
+                    this.bindEvents();
+                }
                 
-    //             bindEvents() {
-    //                 // Quantity change buttons
-    //                 document.addEventListener("click", (e) => {
-    //                     if (e.target.classList.contains("quantity-decrease")) {
-    //                         this.updateQuantity(e.target.dataset.productId, -1);
-    //                     }
-    //                     if (e.target.classList.contains("quantity-increase")) {
-    //                         this.updateQuantity(e.target.dataset.productId, 1);
-    //                     }
-    //                     if (e.target.classList.contains("remove-item")) {
-    //                         this.removeFromCart(e.target.dataset.productId);
-    //                     }
-    //                 });
+                bindEvents() {
+                    // Quantity change buttons
+                    document.addEventListener("click", (e) => {
+                        if (e.target.classList.contains("quantity-decrease")) {
+                            this.updateQuantity(e.target.dataset.productId, -1);
+                        }
+                        if (e.target.classList.contains("quantity-increase")) {
+                            this.updateQuantity(e.target.dataset.productId, 1);
+                        }
+                        if (e.target.classList.contains("remove-item")) {
+                            this.removeFromCart(e.target.dataset.productId);
+                        }
+                    });
                     
-    //                 // Direct quantity input change
-    //                 document.addEventListener("change", (e) => {
-    //                     if (e.target.classList.contains("quantity-input")) {
-    //                         const productId = e.target.dataset.productId;
-    //                         const currentQty = parseInt(e.target.dataset.currentQty);
-    //                         const newQty = parseInt(e.target.value);
-    //                         const change = newQty - currentQty;
+                    // Direct quantity input change
+                    document.addEventListener("change", (e) => {
+                        if (e.target.classList.contains("quantity-input")) {
+                            const productId = e.target.dataset.productId;
+                            const currentQty = parseInt(e.target.dataset.currentQty);
+                            const newQty = parseInt(e.target.value);
+                            const change = newQty - currentQty;
                             
-    //                         if (change !== 0) {
-    //                             this.updateQuantity(productId, change, true);
-    //                         }
-    //                     }
-    //                 });
-    //             }
+                            if (change !== 0) {
+                                this.updateQuantity(productId, change, true);
+                            }
+                        }
+                    });
+                }
                 
-    //             showLoading() {
-    //                 document.querySelector(".loading-overlay").style.display = "flex";
-    //             }
+                showLoading() {
+                    document.querySelector(".loading-overlay").style.display = "flex";
+                }
                 
-    //             hideLoading() {
-    //                 document.querySelector(".loading-overlay").style.display = "none";
-    //             }
+                hideLoading() {
+                    document.querySelector(".loading-overlay").style.display = "none";
+                }
                 
-    //             showAlert(message, type = "success") {
-    //                 const alertDiv = document.createElement("div");
-    //                 alertDiv.className = `alert alert-${type}`;
-    //                 alertDiv.textContent = message;
+                showAlert(message, type = "success") {
+                    const alertDiv = document.createElement("div");
+                    alertDiv.className = `alert alert-${type}`;
+                    alertDiv.textContent = message;
                     
-    //                 const container = document.querySelector(".cart-container .container");
-    //                 container.insertBefore(alertDiv, container.firstChild);
+                    const container = document.querySelector(".cart-container .container");
+                    container.insertBefore(alertDiv, container.firstChild);
                     
-    //                 setTimeout(() => {
-    //                     alertDiv.remove();
-    //                 }, 3000);
-    //             }
+                    setTimeout(() => {
+                        alertDiv.remove();
+                    }, 3000);
+                }
                 
-    //             updateQuantity(productId, change, absolute = false) {
-    //                 this.showLoading();
+                updateQuantity(productId, change, absolute = false) {
+                    this.showLoading();
                     
-    //                 const formData = new FormData();
-    //                 formData.append("ProductID", productId);
-    //                 formData.append("Change", change);
-    //                 formData.append("Absolute", absolute ? "1" : "0");
+                    const formData = new FormData();
+                    formData.append("ProductID", productId);
+                    formData.append("Change", change);
+                    formData.append("Absolute", absolute ? "1" : "0");
                     
-    //                 fetch("' . $this->Link() . 'updateQuantity", {
-    //                     method: "POST",
-    //                     body: formData,
-    //                     headers: {
-    //                         "X-Requested-With": "XMLHttpRequest"
-    //                     }
-    //                 })
-    //                 .then(response => response.json())
-    //                 .then(data => {
-    //                     this.hideLoading();
+                    fetch("' . $this->Link() . 'updateQuantity", {
+                        method: "POST",
+                        body: formData,
+                        headers: {
+                            "X-Requested-With": "XMLHttpRequest"
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        this.hideLoading();
                         
-    //                     if (data.success) {
-    //                         // Update quantity display
-    //                         const quantityInput = document.querySelector(`input[data-product-id="${productId}"]`);
-    //                         if (quantityInput) {
-    //                             quantityInput.value = data.newQuantity;
-    //                             quantityInput.dataset.currentQty = data.newQuantity;
-    //                         }
+                        if (data.success) {
+                            // Update quantity display
+                            const quantityInput = document.querySelector(`input[data-product-id="${productId}"]`);
+                            if (quantityInput) {
+                                quantityInput.value = data.newQuantity;
+                                quantityInput.dataset.currentQty = data.newQuantity;
+                            }
                             
-    //                         // Update subtotal
-    //                         const subtotalElement = document.querySelector(`#subtotal-${productId}`);
-    //                         if (subtotalElement) {
-    //                             subtotalElement.textContent = data.subtotal;
-    //                         }
+                            // Update subtotal
+                            const subtotalElement = document.querySelector(`#subtotal-${productId}`);
+                            if (subtotalElement) {
+                                subtotalElement.textContent = data.subtotal;
+                            }
                             
-    //                         // Update cart totals
-    //                         this.updateCartTotals(data.cartData);
+                            // Update cart totals
+                            this.updateCartTotals(data.cartData);
                             
-    //                         // Remove item if quantity is 0
-    //                         if (data.newQuantity === 0) {
-    //                             document.querySelector(`#cart-item-${productId}`).remove();
-    //                             this.checkEmptyCart();
-    //                         }
+                            // Remove item if quantity is 0
+                            if (data.newQuantity === 0) {
+                                document.querySelector(`#cart-item-${productId}`).remove();
+                                this.checkEmptyCart();
+                            }
                             
-    //                         this.showAlert(data.message);
-    //                     } else {
-    //                         this.showAlert(data.message, "danger");
-    //                     }
-    //                 })
-    //                 .catch(error => {
-    //                     this.hideLoading();
-    //                     this.showAlert("An error occurred. Please try again.", "danger");
-    //                     console.error("Error:", error);
-    //                 });
-    //             }
+                            this.showAlert(data.message);
+                        } else {
+                            this.showAlert(data.message, "danger");
+                        }
+                    })
+                    .catch(error => {
+                        this.hideLoading();
+                        this.showAlert("An error occurred. Please try again.", "danger");
+                        console.error("Error:", error);
+                    });
+                }
                 
-    //             removeFromCart(productId) {
-    //                 if (!confirm("Are you sure you want to remove this item?")) {
-    //                     return;
-    //                 }
+                removeFromCart(productId) {
+                    if (!confirm("Are you sure you want to remove this item?")) {
+                        return;
+                    }
                     
-    //                 this.showLoading();
+                    this.showLoading();
                     
-    //                 const formData = new FormData();
-    //                 formData.append("ProductID", productId);
+                    const formData = new FormData();
+                    formData.append("ProductID", productId);
                     
-    //                 fetch("' . $this->Link() . 'removeFromCart", {
-    //                     method: "POST",
-    //                     body: formData,
-    //                     headers: {
-    //                         "X-Requested-With": "XMLHttpRequest"
-    //                     }
-    //                 })
-    //                 .then(response => response.json())
-    //                 .then(data => {
-    //                     this.hideLoading();
+                    fetch("' . $this->Link() . 'removeFromCart", {
+                        method: "POST",
+                        body: formData,
+                        headers: {
+                            "X-Requested-With": "XMLHttpRequest"
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        this.hideLoading();
                         
-    //                     if (data.success) {
-    //                         document.querySelector(`#cart-item-${productId}`).remove();
-    //                         this.updateCartTotals(data.cartData);
-    //                         this.checkEmptyCart();
-    //                         this.showAlert(data.message);
-    //                     } else {
-    //                         this.showAlert(data.message, "danger");
-    //                     }
-    //                 })
-    //                 .catch(error => {
-    //                     this.hideLoading();
-    //                     this.showAlert("An error occurred. Please try again.", "danger");
-    //                     console.error("Error:", error);
-    //                 });
-    //             }
+                        if (data.success) {
+                            document.querySelector(`#cart-item-${productId}`).remove();
+                            this.updateCartTotals(data.cartData);
+                            this.checkEmptyCart();
+                            this.showAlert(data.message);
+                        } else {
+                            this.showAlert(data.message, "danger");
+                        }
+                    })
+                    .catch(error => {
+                        this.hideLoading();
+                        this.showAlert("An error occurred. Please try again.", "danger");
+                        console.error("Error:", error);
+                    });
+                }
                 
-    //             updateCartTotals(cartData) {
-    //                 const totalItemsElement = document.querySelector("#total-items");
-    //                 const totalPriceElement = document.querySelector("#total-price");
+                updateCartTotals(cartData) {
+                    const totalItemsElement = document.querySelector("#total-items");
+                    const totalPriceElement = document.querySelector("#total-price");
                     
-    //                 if (totalItemsElement) {
-    //                     totalItemsElement.textContent = cartData.totalItems;
-    //                 }
-    //                 if (totalPriceElement) {
-    //                     totalPriceElement.textContent = cartData.totalFormatted;
-    //                 }
-    //             }
+                    if (totalItemsElement) {
+                        totalItemsElement.textContent = cartData.totalItems;
+                    }
+                    if (totalPriceElement) {
+                        totalPriceElement.textContent = cartData.totalFormatted;
+                    }
+                }
                 
-    //             checkEmptyCart() {
-    //                 const cartItems = document.querySelectorAll(".cart-item");
-    //                 if (cartItems.length === 0) {
-    //                     location.reload(); // Reload to show empty cart message
-    //                 }
-    //             }
-    //         }
+                checkEmptyCart() {
+                    const cartItems = document.querySelectorAll(".cart-item");
+                    if (cartItems.length === 0) {
+                        location.reload(); // Reload to show empty cart message
+                    }
+                }
+            }
             
-    //         // Initialize cart when DOM is loaded
-    //         document.addEventListener("DOMContentLoaded", function() {
-    //             new Cart();
-    //         });
-    //     ');
-    // }
+            // Initialize cart when DOM is loaded
+            document.addEventListener("DOMContentLoaded", function() {
+                new Cart();
+            });
+        ');
+    }
 
     public function index()
     {
