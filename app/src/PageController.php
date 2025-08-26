@@ -33,5 +33,13 @@ namespace {
             // You can include any CSS or JS required by your project here.
             // See: https://docs.silverstripe.org/en/developer_guides/templates/requirements/
         }
+
+        // di PageController.php atau Page.php
+        public function FilteredMenu($level = 1) 
+        {
+            $menu = $this->Menu($level);
+            return $menu->exclude('URLSegment', 'cart');
+        }
+        
     }
 }

@@ -28,9 +28,11 @@
       <div class="collapse navbar-collapse justify-content-center text-dark fw-bold" id="navbarNav">
         <ul class="navbar-nav gap-3">
           <% loop $Menu(1) %>
-            <li class="nav-item">
-              <a class="nav-link $LinkingMode" href="$Link" title="$Title.XML">$MenuTitle.XML</a>
-            </li>
+            <% if $MenuTitle != 'Cart' %>
+              <li class="nav-item">
+                <a class="nav-link $LinkingMode" href="$Link" title="$Title.XML">$MenuTitle.XML</a>
+              </li>
+            <% end_if %>
           <% end_loop %>
         </ul>
       </div>
@@ -41,9 +43,17 @@
         <i class="bi bi-heart position-relative">
           <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill" style="background-color: #b78b5c; color: white;">3</span>
         </i>
-        <i class="bi bi-cart3 position-relative">
-          <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill" style="background-color: #b78b5c; color: white;">12</span>
+        <i class="position-relative">
+          <a class="nav-link cart-icon" href="/cartpage/">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="9" cy="21" r="1"></circle>
+              <circle cx="20" cy="21" r="1"></circle>
+              <path d="m1 1 4 4 2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+            </svg>
+            <span class="cart-counter">0</span>
+          </a>
         </i>
+
       </div>
 
     </div>

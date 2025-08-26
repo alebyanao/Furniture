@@ -35,7 +35,7 @@
           <!-- Description -->
           <div class="mb-2 mb-md-3 flex-grow-1">
             <strong class="d-block mb-2">Deskripsi :</strong>
-            <div class="border rounded p-3" style="height: 170px; overflow-y: auto; background-color: #fafafa;">
+            <div class="border p-3" style="height: 170px; overflow-y: auto; background-color: #fafafa;">
                 <% if $Description %>
                     $Description
                 <% else %>
@@ -65,12 +65,12 @@
               <div class="d-flex align-items-center gap-2 flex-wrap w-100 w-sm-auto">
                 <div class="input-group rounded-pill border overflow-hidden flex-shrink-0" style="width: 120px; max-width: 120px;">
                   <button class="btn btn-outline-secondary border-0 px-2" type="button" onclick="changeQuantity(-1)">-</button>
-                  <input type="number" id="quantity" class="form-control text-center border-0 px-1" value="1" min="1" max="99" readonly style="font-size: 14px;">
+                  <input type="number" id="quantity" class="form-control text-center border-0 px-1" value="1" min="1" max="$Stock" readonly style="font-size: 14px;">
                   <button class="btn btn-outline-secondary border-0 px-2" type="button" onclick="changeQuantity(1)">+</button>
                 </div>
 
                 <div class="d-flex gap-2">
-                  <button class="btn text-white fw-bold px-3 px-md-4 rounded-pill" style="background-color: #c4965c; font-size: 14px;" onclick="addToCart()">keranjang</button>
+                  <button class="btn text-white fw-bold px-3 px-md-4 rounded-pill" style="background-color: #c4965c; font-size: 14px;" onclick="addToCartFromProduct()">keranjang</button>
                   <button class="btn btn-outline-secondary rounded-pill d-flex align-items-center justify-content-center" style="width: 40px; height: 38px;" title="Add to Wishlist">
                     <i class="far fa-heart"></i>
                   </button>
@@ -152,3 +152,101 @@
         <% end_if %>
     </div>
 </div>
+
+<script>
+function changeQuantity(change) {
+    const input = document.getElementById("quantity");
+    let currentValue = parseInt(input.value) || 1;
+    let newValue = currentValue + change;
+    
+    const maxStock = parseInt(input.getAttribute('max'));
+    
+    if (newValue < 1) newValue = 1;
+    if (newValue > maxStock) newValue = maxStock;
+    
+    input.value = newValue;
+}
+
+function addToCartFromProduct() {
+    const quantity = parseInt(document.getElementById("quantity").value) || 1;
+    const productId = <% with $Product %>$ID<% end_with %>;
+    
+    // Show loading state
+    const btn = event.target;
+    const originalText = btn.textContent;
+    btn.textContent = 'Adding...';
+    btn.disabled = true;
+    
+    // Try multiple possible cart URLs
+    const possibleUrls = [
+        '/cart/addToCart',
+        '/cart/addToCart/',
+        window.location.origin + '/cart/addToCart',
+        window.location.protocol + '//' + window.location.host + '/cart/addToCart'
+    ];
+    
+    const formData = new FormData();
+    formData.append('ProductID', productId);
+    formData.append('Quantity', quantity);
+    
+    // Try the first URL, if it fails, the error handling will show details
+    fetch(possibleUrls[0], {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => {
+        console.log('Response status:', response.status);
+        console.log('Response headers:', response.headers);
+        
+        // Check if response is OK
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        // Check if response is JSON
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            throw new Error('Response is not JSON');
+        }
+        
+        return response.json();
+    })
+    .then(data => {
+        // Reset button
+        btn.textContent = originalText;
+        btn.disabled = false;
+        
+        if (data.success) {
+            alert(data.message);
+            // Reset quantity to 1
+            document.getElementById("quantity").value = 1;
+            
+            // Ask if user wants to continue shopping or go to cart
+            if (confirm('Item added to cart! Do you want to view your cart now?')) {
+                window.location.href = '/cart/';
+            }
+        } else {
+            alert(data.message);
+        }
+    })
+    .catch(error => {
+        // Reset button
+        btn.textContent = originalText;
+        btn.disabled = false;
+        
+        console.error('Detailed error:', error);
+        console.error('Error message:', error.message);
+        
+        // Show more detailed error message
+        alert('Error details: ' + error.message + '\nPlease check the browser console for more information.');
+        
+        // Try alternative: redirect to cart page with product info
+        if (confirm('Would you like to try adding to cart via page redirect?')) {
+            window.location.href = `/cart/addToCart?ProductID=${productId}&Quantity=${quantity}`;
+        }
+    });
+}
+</script>
