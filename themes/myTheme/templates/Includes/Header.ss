@@ -1,20 +1,22 @@
-	<!-- Top Bar -->
+<!-- Top Bar -->
 <% if $SiteConfig.getField('TopBarEnabled') %>
-<div class="sticky-top">
-  <div class="top-bar w-150">
+  <div class="sticky-top">
+    <div class="top-bar w-150">
       <div class="text-white small py-1 d-flex justify-content-center align-items-center px-4" style="background-color: #b78b5c">
-          <div class="text-uppercase position-relative" style="transform: translateX(-20px);">
-              $SiteConfig.getField('TopBarText')
-          </div>
+        <div class="text-uppercase position-relative" style="transform: translateX(-20px);">
+          $SiteConfig.getField('TopBarText')
+        </div>
       </div>
-  </div>
-
-  <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
-  <% else %>
-  <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
-  <% end_if %>
-
-    <div class="container">
+    </div>
+    
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm d-flex justify-content-between px-3 px-md-5">
+    <% else %>
+      <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm d-flex justify-content-between px-3 px-md-5">
+      <% end_if %>
+    
+      <div class="container-fluid">
+        <div class="row w-100">
+          <div class="col-12 col-md-9 mx-auto d-flex justify-content-between align-items-center">
 
       <!-- Logo dari SiteConfig -->
       <img src="$SiteConfig.FooterLogo.URL" alt="$SiteConfig.FooterLogo.Title" class="mb-2 img-fluid" style="max-height: 40px;">
@@ -53,9 +55,10 @@
             <span class="cart-counter">0</span>
           </a>
         </i>
-
+            </div>
+          </div>
+        </div>
       </div>
-
     </div>
   </nav>
-</div>
+</div> 

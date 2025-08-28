@@ -48,7 +48,6 @@ Change it, enhance it and most importantly enjoy it!
 	</div>
 </div>
 <% include Footer %>
-
 <% require javascript('//code.jquery.com/jquery-3.7.1.min.js') %>
 <% require themedJavascript('custom') %>
 

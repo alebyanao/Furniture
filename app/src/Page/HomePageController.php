@@ -7,7 +7,6 @@ use PageController;
 use SilverStripe\ORM\ArrayList;
 use SilverStripe\Control\HTTPRequest;
 use App\Models\FeatureItem;
-use PromoCard;
 use Product;
 use Category;
 
@@ -230,22 +229,6 @@ class HomePageController extends PageController
         $features = $this->getFeatureItems();
         return $features && $features->count() > 0;
     }
-
-    public function getPromoCards()
-    {
-        return PromoCard::getActivePromoCards();
-    }
-
-    public function hasPromoCards()
-    {
-        $promoCards = $this->getPromoCards();
-        return $promoCards && $promoCards->count() > 0;
-    }
-
-    public function getTwoPromoCards()
-    {
-        return $this->getPromoCards()->limit(2);
-    }   
 
     public function index()
     {

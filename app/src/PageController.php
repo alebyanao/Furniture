@@ -10,6 +10,32 @@ namespace {
      */
     class PageController extends ContentController
     {
+
+        public function getPromoCards()
+        {
+            return PromoCard::getActivePromoCards();
+        }
+
+        public function hasPromoCards()
+        {
+            return $this->getPromoCards()->exists();
+        }
+
+        public function getTwoPromoCards()
+        {
+            return $this->getPromoCards()->limit(2);
+        }
+
+        public function getAllPromoCards()
+        {
+            return $this->getPromoCards();
+        }
+
+        public function getPromoCardsCount()
+        {
+            return $this->getPromoCards()->count();
+        }
+
         /**
          * An array of actions that can be accessed via a request. Each array element should be an action name, and the
          * permissions or conditions required to allow the user to access it.
