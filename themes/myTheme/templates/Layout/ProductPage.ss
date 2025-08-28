@@ -11,7 +11,7 @@
     <div class="row">
         <% loop $Products %>
         <div class="col-lg-3 col-md-4 col-sm-6 col-12 mb-4">
-            <div class="product-card" onclick="window.location.href='$Top.Link(product)/$ID'">
+            <div class="product-card" onclick="window.location.href='Product.OtherProducts'">
                 <div class="product-image-container position-relative" style="background-color: #fdf8ef; padding: 40px 20px 60px; min-height: 350px;">
                     <% if $hasDiscount %>
                     <div class="discount-badge position-absolute" style="top: 15px; left: 15px; background-color: #c4965c; color: white; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold;">
@@ -22,7 +22,7 @@
                     <% if $Image %>
                     <img src="$Image.FitMax(160,160).URL" alt="$Name" class="img-fluid" style="max-height: 160px; width: 100%; object-fit: contain;">
                     <% else %>
-                    <img src="https://via.placeholder.com/160x160/f5f5f5/cccccc?text=No+Image" alt="$Name" class="img-fluid" style="max-height: 160px; width: 100%; object-fit: contain;">
+                    <img src="https://via.placeholder.com/160x160/f5f5f5/cccccc?text=No+Ima ge" alt="$Name" class="img-fluid" style="max-height: 160px; width: 100%; object-fit: contain;">
                     <% end_if %>
                 </div>
                 

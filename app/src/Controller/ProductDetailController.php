@@ -2,7 +2,6 @@
 
 use SilverStripe\CMS\Controllers\ContentController;
 use SilverStripe\Control\HTTPRequest;
-use SilverStripe\Control\Controller;
 use SilverStripe\View\Requirements;
 
 class ProductDetailController extends ContentController 
@@ -14,7 +13,7 @@ class ProductDetailController extends ContentController
     private static $url_handlers = [
         'show/$ID' => 'show'
     ];
-    
+
     public function show(HTTPRequest $request)
     {
         $productID = $request->param('ID');
@@ -212,6 +211,7 @@ class ProductDetailController extends ContentController
 
         return [
             'Product' => $product,
+            'OtherProducts' => $product->getOtherProducts(),
             'Title' => $product->Name . ' - Product Detail'
         ];
     }

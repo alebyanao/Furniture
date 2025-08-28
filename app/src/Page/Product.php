@@ -95,7 +95,7 @@ class Product extends DataObject
         return $this->Discount > 0 ? 'Rp ' . $this->formatRupiah($this->Discount) : 'No Discount';
     }
 
-        public function getDiscountPrice()
+    public function getDiscountPrice()
     {
         return max(0, $this->Price - $this->Discount);
     }
@@ -182,11 +182,34 @@ class Product extends DataObject
         return $categories->count() > 0 ? $categories->first()->Name : 'Uncategorized';
     }
     
-    // Add this method to your existing Product.php class
-    
+    // Utility
     public function formatRupiahPublic($amount)
     {
         return number_format($amount, 0, ',', '.');
     }
 
+    public function DetailLink()
+    {
+        return '/product/show/' . $this->ID;
+    }
+
+    /**
+     * Produk lainnya (selalu tersedia di semua halaman)
+     */
+    public function getOtherProducts($limit = 4)
+    {
+        // rekomendasi produk lain berdasarkan kategori yang sama
+        $categories = $this->Categories()->column('ID');
+        if (!empty($categories)) {
+            return Product::get()
+                ->filter('Categories.ID', $categories)
+                ->exclude('ID', $this->ID)
+                ->limit($limit);
+        }
+
+        // fallback: kalau ga ada kategori, ambil produk lain random
+        return Product::get()
+            ->exclude('ID', $this->ID)
+            ->limit($limit);
+    }
 }
