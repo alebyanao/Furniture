@@ -12,9 +12,6 @@ use SilverStripe\Forms\DropdownField;
 use SilverStripe\Forms\HiddenField;
 use SilverStripe\Forms\FormAction;
 use SilverStripe\Forms\RequiredFields;
-use SilverStripe\Control\Controller;
-use SilverStripe\ORM\DataObject;
-use SilverStripe\View\Requirements;
 
 class ProductPage extends SiteTree 
 {
@@ -25,6 +22,7 @@ class ProductPageController extends ContentController
     private static $url_handlers = [
     'product/$ID' => 'product'
     ];
+
     private static $allowed_actions = [
         'product',
         'ReviewForm',

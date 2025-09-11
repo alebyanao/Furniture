@@ -21,6 +21,10 @@ ErrorDocument 500 /assets/error-500.html
 
 <IfModule mod_rewrite.c>
 
+# RewriteEngine On
+# RewriteCond %{HTTPS} !=on
+# RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
     # Turn off index.php handling requests to the homepage fixes issue in apache >=2.4
     <IfModule mod_dir.c>
         DirectoryIndex disabled
@@ -45,3 +49,4 @@ ErrorDocument 500 /assets/error-500.html
     RewriteRule .* index.php
 </IfModule>
 ### SILVERSTRIPE END ###
+

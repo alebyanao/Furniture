@@ -249,4 +249,5 @@ class HomePageController extends PageController
         ])->renderWith(['ProductDetailShow', 'Page']);
     }
 
+    
 }

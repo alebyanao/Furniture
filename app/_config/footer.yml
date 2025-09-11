@@ -2,6 +2,7 @@
 Name: footer-config
 After: 'framework/*'
 ---
+
 SilverStripe\SiteConfig\SiteConfig:
   extensions:
     - FooterSiteConfigExtension

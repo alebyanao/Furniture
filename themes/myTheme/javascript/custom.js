@@ -16,8 +16,7 @@ document.addEventListener('DOMContentLoaded', function() {
             fadeEffect: {
                 crossFade: true
             },
-            allowTouchMove: false, // Disable manual swiping
-            // Remove indicators and controls
+            allowTouchMove: false, 
             pagination: false,
             navigation: false,
         });
@@ -480,66 +479,3 @@ window.addEventListener('beforeunload', () => {
 // Expose functions globally for onclick handlers
 window.handleCarouselClick = handleCarouselClick;
 window.initializeCarousels = initializeCarousels;
-
-// CART JS
-// Global cart functionality
-// window.CartManager = {
-//     updateCartCounter: function() {
-//         fetch('/cart/getTotalItems', {
-//             method: 'GET',
-//             headers: {
-//                 'X-Requested-With': 'XMLHttpRequest'
-//             }
-//         })
-//         .then(response => response.json())
-//         .then(data => {
-//             const cartCounters = document.querySelectorAll('.cart-counter');
-//             cartCounters.forEach(counter => {
-//                 if (data.totalItems > 0) {
-//                     counter.textContent = data.totalItems;
-//                     counter.style.display = 'inline-block';
-//                 } else {
-//                     counter.style.display = 'none';
-//                 }
-//             });
-//         })
-//         .catch(error => console.error('Error updating cart counter:', error));
-//     },
-    
-//     addToCart: function(productId, quantity = 1) {
-//         const formData = new FormData();
-//         formData.append('ProductID', productId);
-//         formData.append('Quantity', quantity);
-        
-//         return fetch('/cart/addToCart', {
-//             method: 'POST',
-//             body: formData,
-//             headers: {
-//                 'X-Requested-With': 'XMLHttpRequest'
-//             }
-//         })
-//         .then(response => response.json())
-//         .then(data => {
-//             if (data.success) {
-//                 this.updateCartCounter();
-//                 alert(data.message);
-//                 return data;
-//             } else {
-//                 alert(data.message);
-//                 throw new Error(data.message);
-//             }
-//         })
-//         .catch(error => {
-//             alert('An error occurred. Please try again.');
-//             console.error('Error:', error);
-//             throw error;
-//         });
-//     }
-// };
-
-// // Update cart counter when page loads
-// document.addEventListener('DOMContentLoaded', function() {
-//     if (window.CartManager) {
-//         window.CartManager.updateCartCounter();
-//     }
-// });

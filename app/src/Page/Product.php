@@ -190,7 +190,7 @@ class Product extends DataObject
 
     public function DetailLink()
     {
-        return '/product/show/' . $this->ID;
+        return '/shop/product/' . $this->ID;
     }
 
     /**

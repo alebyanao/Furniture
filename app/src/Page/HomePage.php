@@ -16,11 +16,6 @@ class HomePage extends SiteTree
         'FeaturesEnabled' => 'Boolean'
     ];
 
-    // Option 1: HomePage has_many FeatureItems (jika mau features per page)
-    // private static $has_many = [
-    //     'PageFeatures' => FeatureItem::class
-    // ];
-
     private static $defaults = [
         'HeroBannerEnabled' => true,
         'FeaturesEnabled' => true

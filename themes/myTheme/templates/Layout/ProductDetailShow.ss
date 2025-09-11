@@ -71,18 +71,15 @@
 
                 <div class="d-flex gap-2">
                   <button class="btn text-white fw-bold px-3 px-md-4 rounded-pill" style="background-color: #c4965c; font-size: 14px;" onclick="addToCartFromProduct()">keranjang</button>
-                  <button class="btn btn-outline-danger rounded-pill d-flex align-items-center justify-content-center" style="width: 40px; height: 38px;" title="Add to Wishlist" id="wishlist-btn" onclick="toggleWishlist($ID)">
-                    <i class="far fa-heart" id="wishlist-icon-$ID"></i>
+                  <button class="btn btn-outline-secondary rounded-pill d-flex align-items-center justify-content-center" style="width: 40px; height: 38px;" title="Add to Wishlist">
+                    <i class="far fa-heart"></i>
                   </button>
                 </div>
               </div>
             </div>
             <% else %>
-            <div class="alert alert-warning mt-3 mb-0 d-flex justify-content-between align-items-center">
-              <span><strong>Out of Stock</strong> - This product is currently unavailable</span>
-              <button class="btn btn-outline-danger btn-sm" title="Add to Wishlist" id="wishlist-btn" onclick="toggleWishlist($ID)">
-                <i class="far fa-heart" id="wishlist-icon-$ID"></i> Wishlist
-              </button>
+            <div class="alert alert-warning mt-3 mb-0">
+              <strong>Out of Stock</strong> - This product is currently unavailable
             </div>
             <% end_if %>
           </div>
@@ -102,15 +99,7 @@
         <div class="row">
         <% loop $Products %>
         <div class="col-lg-3 col-md-4 col-sm-6 col-12 mb-4">
-            <div class="product-card position-relative" onclick="window.location.href='$Top.Link(product)/$ID'">
-                <!-- Wishlist Button on Product Card -->
-                <button class="btn btn-outline-danger position-absolute rounded-circle" 
-                        style="top: 10px; right: 10px; width: 35px; height: 35px; z-index: 3; background-color: rgba(255,255,255,0.9);" 
-                        title="Add to Wishlist" 
-                        onclick="event.stopPropagation(); toggleWishlist($ID)">
-                    <i class="far fa-heart fa-sm" id="wishlist-icon-$ID"></i>
-                </button>
-
+            <div class="product-card" onclick="window.location.href='$Top.Link(product)/$ID'">
                 <div class="product-image-container position-relative" style="background-color: #fdf8ef; padding: 40px 20px 60px; min-height: 350px;">
                     <% if $hasDiscount %>
                     <div class="discount-badge position-absolute" style="top: 15px; left: 15px; background-color: #c4965c; color: white; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold;">
@@ -153,7 +142,7 @@
             </div>
         </div>
         <% end_loop %>
-        <% if not $Products %>
+        <% if not $Product %>
         <div class="col-12">
             <div class="alert alert-info text-center">
                 <h4>No Products Available</h4>
@@ -163,10 +152,6 @@
         <% end_if %>
     </div>
 </div>
-
-<!-- Bootstrap and Font Awesome -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
 <script>
 function changeQuantity(change) {
@@ -192,11 +177,20 @@ function addToCartFromProduct() {
     btn.textContent = 'Adding...';
     btn.disabled = true;
     
+    // Try multiple possible cart URLs
+    const possibleUrls = [
+        '/cart/addToCart',
+        '/cart/addToCart/',
+        window.location.origin + '/cart/addToCart',
+        window.location.protocol + '//' + window.location.host + '/cart/addToCart'
+    ];
+    
     const formData = new FormData();
     formData.append('ProductID', productId);
     formData.append('Quantity', quantity);
     
-    fetch('/cart/addToCart', {
+    // Try the first URL, if it fails, the error handling will show details
+    fetch(possibleUrls[0], {
         method: 'POST',
         body: formData,
         headers: {
@@ -205,11 +199,14 @@ function addToCartFromProduct() {
     })
     .then(response => {
         console.log('Response status:', response.status);
+        console.log('Response headers:', response.headers);
         
+        // Check if response is OK
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         
+        // Check if response is JSON
         const contentType = response.headers.get('content-type');
         if (!contentType || !contentType.includes('application/json')) {
             throw new Error('Response is not JSON');
@@ -223,7 +220,7 @@ function addToCartFromProduct() {
         btn.disabled = false;
         
         if (data.success) {
-            showMessage(data.message, 'success');
+            alert(data.message);
             // Reset quantity to 1
             document.getElementById("quantity").value = 1;
             
@@ -232,7 +229,7 @@ function addToCartFromProduct() {
                 window.location.href = '/cart/';
             }
         } else {
-            showMessage(data.message, 'error');
+            alert(data.message);
         }
     })
     .catch(error => {
@@ -241,7 +238,10 @@ function addToCartFromProduct() {
         btn.disabled = false;
         
         console.error('Detailed error:', error);
-        showMessage('Error adding to cart: ' + error.message, 'error');
+        console.error('Error message:', error.message);
+        
+        // Show more detailed error message
+        alert('Error details: ' + error.message + '\nPlease check the browser console for more information.');
         
         // Try alternative: redirect to cart page with product info
         if (confirm('Would you like to try adding to cart via page redirect?')) {
@@ -249,114 +249,4 @@ function addToCartFromProduct() {
         }
     });
 }
-
-function toggleWishlist(productId) {
-    const icon = document.getElementById('wishlist-icon-' + productId);
-    const isInWishlist = icon.classList.contains('fas');
-    
-    if (isInWishlist) {
-        // Remove from wishlist
-        fetch('/wishlist-page/removeFromWishlist', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'X-Requested-With': 'XMLHttpRequest'
-            },
-            body: 'ProductID=' + productId
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                icon.classList.remove('fas');
-                icon.classList.add('far');
-                showMessage('Product removed from wishlist', 'success');
-            } else {
-                showMessage(data.message, 'error');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showMessage('An error occurred. Please try again.', 'error');
-        });
-    } else {
-        // Add to wishlist
-        fetch('/wishlist-page/addToWishlist', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'X-Requested-With': 'XMLHttpRequest'
-            },
-            body: 'ProductID=' + productId
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                icon.classList.remove('far');
-                icon.classList.add('fas');
-                showMessage('Product added to wishlist!', 'success');
-            } else {
-                showMessage(data.message, 'error');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showMessage('An error occurred. Please try again.', 'error');
-        });
-    }
-}
-
-function showMessage(message, type) {
-    const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
-    const alertDiv = document.createElement('div');
-    alertDiv.className = `alert ${alertClass} alert-dismissible fade show position-fixed`;
-    alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
-    alertDiv.innerHTML = `
-        ${message}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    `;
-    
-    document.body.appendChild(alertDiv);
-    
-    // Auto remove after 5 seconds
-    setTimeout(() => {
-        if (alertDiv.parentNode) {
-            alertDiv.remove();
-        }
-    }, 5000);
-}
-
-// Check wishlist status on page load
-document.addEventListener('DOMContentLoaded', function() {
-    <% with $Product %>
-    checkWishlistStatus($ID);
-    <% end_with %>
-    
-    <% loop $Products %>
-    checkWishlistStatus($ID);
-    <% end_loop %>
-});
-
-function checkWishlistStatus(productId) {
-    fetch('/wishlist-page/isInWishlist?ProductID=' + productId, {
-        method: 'GET',
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest'
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        const icon = document.getElementById('wishlist-icon-' + productId);
-        if (icon) {
-            if (data.inWishlist) {
-                icon.classList.remove('far');
-                icon.classList.add('fas');
-            } else {
-                icon.classList.remove('fas');
-                icon.classList.add('far');
-            }
-        }
-    })
-    .catch(error => {
-        console.error('Error checking wishlist status:', error);
-    });
-}
+</script>

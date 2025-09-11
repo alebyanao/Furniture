@@ -1,0 +1,55 @@
+<% if $flashMessages %>
+<div class="alert alert-$flashMessages.Type alert-dismissible fade show" role="alert">
+    $flashMessages.Message
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+<% end_if %>
+
+<main class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
+    <form action="$BaseHref/auth/register" method="POST" class="w-100 p-4 border rounded shadow-sm" style="max-width: 500px;">
+        <h4 class="mb-3">Daftar</h4>
+        
+        <% if $ValidationResult && not $ValidationResult.IsValid %>
+            <% loop $ValidationResult.getMessages %>
+                <div class="alert alert-danger">$Message</div>
+            <% end_loop %>
+        <% end_if %>
+        
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="register_first_name" class="form-label">Nama Depan</label>
+                <input type="text" class="form-control" id="register_first_name" name="register_first_name" 
+                       value="<% if $ValidationResult %>{$Form.getData.register_first_name}<% end_if %>" required>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label for="register_last_name" class="form-label">Nama Belakang</label>
+                <input type="text" class="form-control" id="register_last_name" name="register_last_name"
+                       value="<% if $ValidationResult %>{$Form.getData.register_last_name}<% end_if %>" required>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label for="register_email" class="form-label">Email</label>
+            <input type="email" class="form-control" id="register_email" name="register_email"
+                   value="<% if $ValidationResult %>{$Form.getData.register_email}<% end_if %>" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="register_password_1" class="form-label">Sandi</label>
+            <input type="password" class="form-control" id="register_password_1" name="register_password_1" required>
+            <div class="form-text">Minimal 6 karakter</div>
+        </div>
+
+        <div class="mb-3">
+            <label for="register_password_2" class="form-label">Konfirmasi Sandi</label>
+            <input type="password" class="form-control" id="register_password_2" name="register_password_2" required>
+        </div>
+
+        <button type="submit" class="btn btn-success w-100 mb-3">Daftar</button>
+        
+        <div class="text-center">
+            <p class="mb-0">Sudah memiliki akun? <a href="$BaseHref/auth/login">Masuk di sini</a></p>
+        </div>
+    </form>
+</main>
