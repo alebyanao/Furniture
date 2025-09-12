@@ -3,7 +3,7 @@
         <div class="row">
             <div class="col-md-8 offset-md-2">
                 <h2>Profil Saya</h2>
-
+                
                 <% if $UpdateSuccess %>
                     <div class="alert alert-success alert-dismissible fade show" role="alert">
                         $UpdateSuccess
@@ -19,7 +19,7 @@
                 <% end_if %>
                 
                 <% if $Member %>
-                    <form method="POST" action="{$BaseHref}profile/update" class="profile-form">
+                    <form method="POST" action="$BaseHref/profile" class="profile-form">
                         <input type="hidden" name="SecurityID" value="$SecurityID" />
                         
                         <div class="mb-3">

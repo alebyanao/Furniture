@@ -26,10 +26,9 @@ Change it, enhance it and most importantly enjoy it!
 	<% require themedCSS('typography') %>
 	<% require themedCSS('form') %>	
 	<% require themedCSS('layout') %> --%>	
-	<%-- <% require themedCSS('custom') %> --%>
+	<% require themedCSS('custom') %>
 	<%-- <% require css('themes/myTheme/css/custom.css') %> --%>
 	
-	<link rel="stylesheet" href="$resourceURL('themes/myTheme/css/custom.css')" />
 	<link rel="shortcut icon" href="$resourceURL('themes/simple/images/favicon.ico')" />
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.css"/>
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
