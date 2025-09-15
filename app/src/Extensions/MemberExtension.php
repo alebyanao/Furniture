@@ -8,7 +8,7 @@ class MemberExtension extends DataExtension
     private static $db = [
         'VerificationToken' => 'Varchar(255)',
         'IsVerified' => 'Boolean',
-        'ResetPasswordToken' => 'varchar(255)',
+        'ResetPasswordToken' => 'Varchar(255)',
         'ResetPasswordExpiry' => 'DateTime',
     ];
 }

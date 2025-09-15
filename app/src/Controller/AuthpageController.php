@@ -288,8 +288,7 @@ class AuthPageController extends PageController
         $baseURL = Environment::getEnv('SS_BASE_URL');
         $ngrokUrl = Environment::getEnv('NGROK_URL');
         $SiteConfig = SiteConfig::current_site_config();
-        $emails = explode(',', $SiteConfig->Email);
-        $CompanyEmail = trim($emails[0]);
+        $CompanyEmail = trim($SiteConfig->CompanyEmail ?? '');
 
         $resetLink = rtrim($ngrokUrl, '/') . '/auth/reset-password?token=' . $resetToken;
 
