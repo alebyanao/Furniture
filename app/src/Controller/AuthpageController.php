@@ -213,50 +213,59 @@ class AuthPageController extends PageController
         $password2 = $request->postVar('register_password_2');
 
         $SiteConfig = SiteConfig::current_site_config();
-        $emails = explode(',', $SiteConfig->Email);
-        $CompanyEmail = trim($emails[0]);
+        $CompanyEmail = $this->getCompanyEmailSafe($SiteConfig);
 
         $result = ValidationResult::create();
 
+        // Validasi input
+        if (empty($firstName)) {
+            $result->addError('First name is required.');
+        }
+
+        if (empty($lastName)) {
+            $result->addError('Last name is required.');
+        }
+
+        if (empty($userEmail) || !filter_var($userEmail, FILTER_VALIDATE_EMAIL)) {
+            $result->addError('Valid email is required.');
+        }
+
         if ($password1 !== $password2) {
             $result->addError('Passwords do not match.');
-            return $result;
+        }
+
+        if (strlen($password1) < 8) {
+            $result->addError('Password must be at least 8 characters long.');
         }
 
         if (Member::get()->filter('Email', $userEmail)->exists()) {
             $result->addError('Email already exists.');
+        }
+
+        // Jika validasi gagal, return error
+        if (!$result->isValid()) {
             return $result;
         }
 
-        $member = Member::create();
-        $member->FirstName = $firstName;
-        $member->Surname = $lastName;
-        $member->Email = $userEmail;
-        $member->VerificationToken = sha1(uniqid());
-        $member->IsVerified = false;
-        $member->write();
-        $member->addToGroupByCode('site-users');
-        $member->changePassword($password1);
+        // Buat member baru
+        try {
+            $member = Member::create();
+            $member->FirstName = $firstName;
+            $member->Surname = $lastName;
+            $member->Email = $userEmail;
+            $member->VerificationToken = sha1(uniqid());
+            $member->IsVerified = false;
+            $member->write();
+            $member->addToGroupByCode('site-users');
+            $member->changePassword($password1);
 
-        $verifyLink = rtrim($ngrokUrl, '/') . '/verify?token=' . $member->VerificationToken;
+            // Kirim email verifikasi
+            $this->sendVerificationEmail($member, $CompanyEmail, $ngrokUrl, $SiteConfig);
 
-        $emailObj = \SilverStripe\Control\Email\Email::create()
-            ->setTo($userEmail)
-            ->setFrom($CompanyEmail)
-            ->setSubject('Verifikasi Email Anda')
-            ->setHTMLTemplate('CustomEmail')
-            ->setData([
-                'Name' => $firstName,
-                'SenderEmail' => $userEmail,
-                'MessageContent' => "
-                    Terima kasih telah mendaftar. Silakan salin link di bawah untuk memverifikasi akun Anda.
-                    {$verifyLink}",
-                'SiteName' => $SiteConfig->Title,
-            ]);
-
-        $emailObj->send();
-
-        $result->addMessage('Registrasi berhasil! Silakan cek email untuk verifikasi akun.');
+            $result->addMessage('Registrasi berhasil! Silakan cek email untuk verifikasi akun.');
+        } catch (Exception $e) {
+            $result->addError('Registration failed: ' . $e->getMessage());
+        }
 
         return $result;
     }
@@ -266,13 +275,12 @@ class AuthPageController extends PageController
         $email = $request->postVar('forgot_email');
         $result = ValidationResult::create();
 
-        if (!$email) {
-            $result->addError('Email harus diisi.');
+        if (!$email || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $result->addError('Valid email is required.');
             return $result;
         }
 
         $member = Member::get()->filter('Email', $email)->first();
-
         if (!$member) {
             $result->addError('Email tidak ditemukan.');
             return $result;
@@ -285,31 +293,11 @@ class AuthPageController extends PageController
         $member->write();
 
         // Send reset email
-        $baseURL = Environment::getEnv('SS_BASE_URL');
         $ngrokUrl = Environment::getEnv('NGROK_URL');
         $SiteConfig = SiteConfig::current_site_config();
-        $CompanyEmail = trim($SiteConfig->CompanyEmail ?? '');
+        $CompanyEmail = $this->getCompanyEmailSafe($SiteConfig);
 
-        $resetLink = rtrim($ngrokUrl, '/') . '/auth/reset-password?token=' . $resetToken;
-
-        $emailObj = \SilverStripe\Control\Email\Email::create()
-            ->setTo($email)
-            ->setFrom($CompanyEmail)
-            ->setSubject('Reset Password Anda')
-            ->setHTMLTemplate('CustomEmail')
-            ->setData([
-                'Name' => $member->FirstName,
-                'SenderEmail' => $email,
-                'MessageContent' => "
-                    Kami menerima permintaan untuk reset password akun Anda.
-                    Klik link berikut untuk reset password (berlaku 1 jam):
-                    {$resetLink}
-                    
-                    Jika Anda tidak meminta reset password, abaikan email ini.",
-                'SiteName' => $SiteConfig->Title,
-            ]);
-
-        $emailObj->send();
+        $this->sendResetPasswordEmail($member, $CompanyEmail, $resetToken, $ngrokUrl, $SiteConfig);
 
         $result->addMessage('Link reset password telah dikirim ke email Anda.');
         return $result;
@@ -332,16 +320,16 @@ class AuthPageController extends PageController
             return $result;
         }
 
-        if (strlen($password1) < 6) {
-            $result->addError('Password minimal 6 karakter.');
+        if (strlen($password1) < 8) {
+            $result->addError('Password minimal 8 karakter.');
             return $result;
         }
 
         // Update password dan hapus token
-        $member->changePassword($password1);
-        $member->ResetPasswordToken = null;
-        $member->ResetPasswordExpiry = null;
         try {
+            $member->changePassword($password1);
+            $member->ResetPasswordToken = null;
+            $member->ResetPasswordExpiry = null;
             $member->write();
             $result->addMessage('Password berhasil direset.');
         } catch (ValidationException $e) {
@@ -349,5 +337,109 @@ class AuthPageController extends PageController
         }
 
         return $result;
+    }
+
+    /**
+     * Safely get company email from SiteConfig
+     */
+    private function getCompanyEmailSafe($siteConfig)
+    {
+        // First try CompanyEmail from CustomSiteConfig extension
+        if (isset($siteConfig->CompanyEmail) && !empty($siteConfig->CompanyEmail)) {
+            $email = trim($siteConfig->CompanyEmail);
+            if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                return $email;
+            }
+        }
+
+        // Then try default SiteConfig Email field
+        if (isset($siteConfig->Email) && !empty($siteConfig->Email)) {
+            $emailString = trim($siteConfig->Email);
+            if ($emailString !== '') {
+                $emails = explode(',', $emailString);
+                $firstEmail = trim($emails[0]);
+                if (filter_var($firstEmail, FILTER_VALIDATE_EMAIL)) {
+                    return $firstEmail;
+                }
+            }
+        }
+
+        // Final fallback - generate from domain
+        $domain = $_SERVER['HTTP_HOST'] ?? 'localhost';
+        return "noreply@{$domain}";
+    }
+
+    /**
+     * Send verification email to new member
+     */
+    private function sendVerificationEmail($member, $fromEmail, $ngrokUrl, $siteConfig)
+    {
+        if (!$fromEmail || !filter_var($fromEmail, FILTER_VALIDATE_EMAIL)) {
+            return false;
+        }
+
+        try {
+            $verifyLink = rtrim($ngrokUrl, '/') . '/verify?token=' . $member->VerificationToken;
+
+            $emailObj = \SilverStripe\Control\Email\Email::create()
+                ->setTo($member->Email)
+                ->setFrom($fromEmail)
+                ->setSubject('Verifikasi Email Anda')
+                ->setHTMLTemplate('CustomEmail')
+                ->setData([
+                    'Name' => $member->FirstName,
+                    'SenderEmail' => $member->Email,
+                    'MessageContent' => "
+                        Terima kasih telah mendaftar. Silakan klik link di bawah untuk memverifikasi akun Anda:
+                        <br><br>
+                        <a href='{$verifyLink}' style='background-color: #b78b5c; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;'>Verifikasi Akun</a>
+                        <br><br>
+                        Atau salin link ini: {$verifyLink}",
+                    'SiteName' => $siteConfig->Title,
+                ]);
+
+            return $emailObj->send();
+        } catch (Exception $e) {
+            error_log("Verification email failed: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Send reset password email
+     */
+    private function sendResetPasswordEmail($member, $fromEmail, $resetToken, $ngrokUrl, $siteConfig)
+    {
+        if (!$fromEmail || !filter_var($fromEmail, FILTER_VALIDATE_EMAIL)) {
+            return false;
+        }
+
+        try {
+            $resetLink = rtrim($ngrokUrl, '/') . '/auth/reset-password?token=' . $resetToken;
+
+            $emailObj = \SilverStripe\Control\Email\Email::create()
+                ->setTo($member->Email)
+                ->setFrom($fromEmail)
+                ->setSubject('Reset Password Anda')
+                ->setHTMLTemplate('CustomEmail')
+                ->setData([
+                    'Name' => $member->FirstName,
+                    'SenderEmail' => $member->Email,
+                    'MessageContent' => "
+                        Kami menerima permintaan untuk reset password akun Anda.
+                        <br><br>
+                        <a href='{$resetLink}' style='background-color: #b78b5c; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;'>Reset Password</a>
+                        <br><br>
+                        Atau salin link ini: {$resetLink}
+                        <br><br>
+                        Link ini berlaku selama 1 jam. Jika Anda tidak meminta reset password, abaikan email ini.",
+                    'SiteName' => $siteConfig->Title,
+                ]);
+
+            return $emailObj->send();
+        } catch (Exception $e) {
+            error_log("Reset password email failed: " . $e->getMessage());
+            return false;
+        }
     }
 }

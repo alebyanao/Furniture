@@ -363,14 +363,6 @@
     100% { opacity: 1; }
 }
 
-/* Product Carousel Styles */
-/* Product Carousel Styles */
-/* .carousel-outer-container {
-    position: relative;
-    padding: 0 60px;
-    margin: 20px 0;
-} */
-
 .product-carousel-container {
     position: relative;
     overflow: hidden;
@@ -434,7 +426,6 @@
     z-index: 5;
     cursor: pointer;
 }
-
 
 .product-info {
     flex-grow: 1;

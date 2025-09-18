@@ -9,6 +9,6 @@ class MemberExtension extends DataExtension
         'VerificationToken' => 'Varchar(255)',
         'IsVerified' => 'Boolean',
         'ResetPasswordToken' => 'Varchar(255)',
-        'ResetPasswordExpiry' => 'DateTime',
+        'ResetPasswordExpiry' => 'Datetime',
     ];
 }

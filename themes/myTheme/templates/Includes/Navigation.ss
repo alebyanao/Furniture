@@ -1,12 +1,14 @@
 <nav class="primary">
-	<button class="nav-open-button">²</button>
+	<button class="nav-open-button d-md-none">☰</button>
 	<ul>
-		<% loop $Menu(1) %>
-		<% if $URLSegment != 'cart' %>
-			<li class="nav-item">
-			<a class="nav-link $LinkingMode" href="$Link" title="$Title.XML">$MenuTitle.XML</a>
-			</li>
-		<% end_if %>
-		<% end_loop %>
+		<li class="nav-item">
+			<a class="nav-link" href="$BaseHref/home" title="home">Home</a>
+		</li>
+		<li class="nav-item">
+			<a class="nav-link" href="$BaseHref/shop" title="shop">Shop</a>
+		</li>
+		<li class="nav-item">
+			<a class="nav-link" href="$BaseHref/blog" title="blog">Blog</a>
+		</li>
 	</ul>
 </nav>

@@ -27,15 +27,17 @@
               
               <!-- Menu dari CMS -->
               <div class="collapse navbar-collapse justify-content-center text-dark fw-bold" id="navbarNav">
-                <ul class="navbar-nav gap-3">
-                  <% loop $Menu(1) %>
-                    <% if $MenuTitle != 'Cart' %>
+                  <ul class="navbar-nav gap-3 horizontal-nav">
                       <li class="nav-item">
-                        <a class="nav-link $LinkingMode" href="$Link" title="$Title.XML">$MenuTitle.XML</a>
+                        <a class="nav-link" href="$BaseHref/home" title="home">Home</a>
                       </li>
-                    <% end_if %>
-                  <% end_loop %>
-                </ul>
+                      <li class="nav-item">
+                        <a class="nav-link" href="$BaseHref/shop" title="shop">Shop</a>
+                      </li>
+                      <li class="nav-item">
+                        <a class="nav-link" href="$BaseHref/blog" title="blog">Blog</a>
+                      </li>
+                  </ul>
               </div>
 
               <!-- Icon kanan -->
