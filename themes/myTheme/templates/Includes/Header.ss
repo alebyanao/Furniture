@@ -68,12 +68,27 @@
                 </div>
 
                 <!-- Wishlist -->
-                <div class="position-relative">
+                <%-- <div class="position-relative">
                   <i class="bi bi-heart position-relative" style="cursor: pointer;">
                     <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill" style="background-color: #b78b5c; color: white; font-size: 0.7rem;">3</span>
                   </i>
-                </div>
-
+                </div> --%>
+                <% if $IsLoggedIn %>
+                    <a href="$BaseHref/wishlist" class="position-relative" style="text-decoration: none;">
+                        <i class="bi bi-heart position-relative" style="cursor: pointer; font-size: 1.5rem; color: #000000;">
+                            <% if $WishlistCount > 0 %>
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill" style="background-color: #b78b5c; color: white; font-size: 0.7rem;">
+                                    $WishlistCount
+                                </span>
+                            <% end_if %>
+                        </i>
+                    </a>
+                <% else %>
+                    <a href="$BaseHref/auth/login" class="position-relative" style="text-decoration: none;">
+                        <i class="bi bi-heart position-relative" style="cursor: pointer; font-size: 1.5rem; color: #000000;"></i>
+                    </a>
+                <% end_if %>
+                  
                 <!-- Cart -->
                 <div class="position-relative">
                   <a class="nav-link cart-icon text-decoration-none text-dark" href="/cartpage/">

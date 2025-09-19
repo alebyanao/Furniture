@@ -71,9 +71,17 @@
 
                 <div class="d-flex gap-2">
                   <button class="btn text-white fw-bold px-3 px-md-4 rounded-pill" style="background-color: #c4965c; font-size: 14px;" onclick="addToCartFromProduct()">keranjang</button>
-                  <button class="btn btn-outline-secondary rounded-pill d-flex align-items-center justify-content-center" style="width: 40px; height: 38px;" title="Add to Wishlist">
-                    <i class="far fa-heart"></i>
-                  </button>
+
+                  <%-- <button class="btn btn-outline-secondary rounded-pill d-flex align-items-center justify-content-center" style="width: 40px; height: 38px;" title="Add to Wishlist"></button> --%>
+                  <button type="button"
+                          class="btn btn-outline-secondary rounded-pill d-flex align-items-center justify-content-center"
+                          style="width: 40px; height: 38px;"
+                          title="Add to Wishlist"
+                          onclick="window.location.href='{$BaseHref}/wishlist/add/$ID'">
+                          <i class="far fa-heart"></i>
+                      <%-- <i class="bi bi-heart"></i> --%>
+                  </button>  
+                  
                 </div>
               </div>
             </div>

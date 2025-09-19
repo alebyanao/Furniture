@@ -7,7 +7,7 @@
 <body style="font-family: Arial, sans-serif; background-color: #f8f9fa; padding: 20px;">
 
   <div style="max-width: 600px; margin: 0 auto; background-color: white; border-radius: 8px; padding: 20px; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
-    <h2 style="color: #007bff;">Pesan Kontak</h2>
+    <h2 style="color: #b78a57;">Pesan Kontak</h2>
 
     <table style="width: 100%; border-collapse: collapse;">
       <tr>
@@ -25,7 +25,7 @@
     </table>
 
     <hr style="margin: 30px 0;">
-    <p style="font-size: 12px; color: #6c757d;">Email ini dikirim dari formulir kontak di website Anda.</p>
+    <p style="font-size: 12px; color: #c4965c;">Email ini dikirim dari formulir kontak di website Anda.</p>
   </div>
 
 </body>

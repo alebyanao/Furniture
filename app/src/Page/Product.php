@@ -28,7 +28,8 @@ class Product extends DataObject
     ];
 
     private static $has_many = [
-        'Reviews' => 'ProductReview'
+        'Reviews' => 'ProductReview',
+        'Wishlist' => Wishlist::class
     ];
 
     private static $owns = [
@@ -186,11 +187,6 @@ class Product extends DataObject
     public function formatRupiahPublic($amount)
     {
         return number_format($amount, 0, ',', '.');
-    }
-
-    public function DetailLink()
-    {
-        return '/shop/product/' . $this->ID;
     }
 
     /**
