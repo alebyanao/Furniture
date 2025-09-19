@@ -6,6 +6,7 @@ use SilverStripe\Forms\TextField;
 use SilverStripe\Forms\NumericField;
 use SilverStripe\Forms\TextareaField;
 use SilverStripe\Forms\CheckboxSetField;
+use SilverStripe\Security\Security;
 
 class Product extends DataObject 
 {
@@ -208,4 +209,23 @@ class Product extends DataObject
             ->exclude('ID', $this->ID)
             ->limit($limit);
     }
+    
+    // Tambahkan method ini ke file Product.php yang sudah ada
+
+    public function getIsInWishlist()
+    {
+        $user = Security::getCurrentUser();
+        
+        if (!$user) {
+            return false;
+        }
+        
+        $wishlist = Wishlist::get()->filter([
+            'ProductID' => $this->ID,
+            'MemberID' => $user->ID
+        ])->first();
+        
+        return $wishlist ? true : false;
+    }
+
 }

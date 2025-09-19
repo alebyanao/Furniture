@@ -2,9 +2,11 @@
 
 namespace {
 
-use SilverStripe\CMS\Controllers\ContentController;
-use SilverStripe\Security\Security;
-use SilverStripe\View\ArrayData;
+    use SilverStripe\CMS\Controllers\ContentController;
+    use SilverStripe\Security\Security;
+    use SilverStripe\View\ArrayData;
+    // Tambahkan import untuk Wishlist class
+    // use App\Model\Wishlist; // sesuaikan dengan namespace Wishlist Anda
 
     /**
      * @template T of Page
@@ -38,21 +40,9 @@ use SilverStripe\View\ArrayData;
             return $this->getPromoCards()->count();
         }
 
-    
         /**
          * An array of actions that can be accessed via a request. Each array element should be an action name, and the
          * permissions or conditions required to allow the user to access it.
-         *
-         * <code>
-         * [
-         *     'action', // anyone can access this action
-         *     'action' => true, // same as above
-         *     'action' => 'ADMIN', // you must have ADMIN permissions to access this action
-         *     'action' => '->checkAction' // you can only access this action if $this->checkAction() returns true
-         * ];
-         * </code>
-         *
-         * @var array
          */
         private static $allowed_actions = [
             "Index"
@@ -82,8 +72,8 @@ use SilverStripe\View\ArrayData;
         {
             return [
                 "IsLoggedIn" => $this->isLoggedIn(),
-                "CurrentUser" => $this->getCurrentUser()
-                // tambahkan logic lainnya
+                "CurrentUser" => $this->getCurrentUser(),
+                "WishlistCount" => $this->getWishlistCount() // tambahkan ini juga
             ];
         }
 
@@ -102,10 +92,29 @@ use SilverStripe\View\ArrayData;
             return null;
         }
 
+        public function getWishlistCount()
+        {
+            if ($this->isLoggedIn()) {
+                $user = $this->getCurrentUser();
+                if ($user && $user->exists()) {
+                    try {
+                        $count = Wishlist::get()->filter('MemberID', $user->ID)->count();
+                        return $count ? (int) $count : 0;
+                    } catch (Exception $e) {
+                        // Log error atau debug
+                        error_log("Error getting wishlist count: " . $e->getMessage());
+                        return 0;
+                    }
+                }
+            }
+            return 0;
+        }
+
         public function isLoggedIn()
         {
-            return Security::getCurrentUser() ?true : false;
+            return Security::getCurrentUser() ? true : false;
         }
+
         // di PageController.php atau Page.php
         public function FilteredMenu($level = 1) 
         {
