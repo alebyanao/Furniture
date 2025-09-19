@@ -31,12 +31,8 @@
                         <h5 class="card-title mb-2 fw-bold">$Product.Name</h5>
                         
                         <!-- Stock Status -->
-                        <p class="mb-2 small">
-                            <strong>Stok:</strong> 
-                            <span class="badge <% if $Product.isInStock %>bg-success<% else %>bg-danger<% end_if %> ms-1">
-                                $Product.StockStatus
-                            </span>
-                        </p>
+                        <p class="mb-2 fs-6"><strong>Stok :</strong> $Product.Stock</p>
+
                         
                         <!-- Rating -->
                         <div class="rating-section mb-2">
@@ -71,8 +67,8 @@
                     <div class="card-body text-center text-md-end">
                         <div class="d-flex flex-column gap-2">
                             <%-- UBAH SUPAYA PERGI KE CART BUKAN KE DETAIL --%>
-                            <a href="$BaseHref/shop" class="btn btn-sm text-white fw-bold rounded-pill" style="background-color: #c4965c;">Lihat Detail</a> 
-                            <a href="$BaseHref/wishlist/remove/$ID" class="btn btn-sm btn-outline-danger rounded-pill" onclick="return confirm('Apakah Anda yakin ingin menghapus item ini dari Wishlist Anda?')">Hapus dari Favorit</a>
+                            <a href="$BaseHref/shop" class="btn btn-sm text-white fw-bold rounded-pill" style="background-color: #c4965c;">Keranjang</a> 
+                            <a href="$BaseHref/wishlist/remove/$ID" class="btn btn-sm btn-outline-danger rounded-pill" onclick="return confirm('Apakah Anda yakin ingin menghapus item ini dari Wishlist Anda?')">Hapus dari Wishlist </a>
                         </div>
                     </div>
                 </div>

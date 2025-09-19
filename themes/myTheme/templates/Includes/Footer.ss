@@ -133,7 +133,7 @@
 
         <!-- Company Address -->
         <% if $SiteConfig.CompanyAddress %>
-          <div class="d-flex align-items-center mb-5">
+          <div class="d-flex align-items-center mb-3">
             <div class="rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 30px; height: 30px; min-width: 30px; min-height: 30px; background-color: #b78b5c; line-height: 1;">
               <i class="bi bi-geo-alt-fill text-white"></i>
             </div>
@@ -154,10 +154,9 @@
             <span class="small">711–2880 Nulla St.</span>
           </div>
         <% end_if %>
-
         <!-- Phone and Working Hours -->
         <% if $SiteConfig.CompanyPhone %>
-          <div class="d-flex align-items-center mb-5">
+          <div class="d-flex align-items-center mb-3">
             <div class="rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 30px; height: 30px; background-color: #b78b5c">
               <i class="bi bi-telephone-fill text-white"></i>
             </div>
@@ -170,7 +169,7 @@
           </div>
         <% else %>
           <!-- Fallback phone -->
-          <div class="d-flex align-items-center mb-5">
+          <div class="d-flex align-items-center mb-3">
             <div class="rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 30px; height: 30px; background-color: #b78b5c">
               <i class="bi bi-telephone-fill text-white"></i>
             </div>
@@ -180,10 +179,9 @@
             </div>
           </div>
         <% end_if %>
-
         <!-- Email -->
         <% if $SiteConfig.CompanyEmail %>
-          <div class="d-flex align-items-center mb-5">
+          <div class="d-flex align-items-center mb-3">
             <div class="rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 30px; height: 30px; background-color: #b78b5c">
               <i class="bi bi-envelope-fill text-white"></i>
             </div>
@@ -192,7 +190,6 @@
             </div>
           </div>
         <% end_if %>
-
         <!-- WhatsApp -->
         <%-- <% if $SiteConfig.WhatsAppNumber %>
           <div class="d-flex align-items-center mb-3">
