@@ -10,5 +10,8 @@
 		<li class="nav-item">
 			<a class="nav-link" href="$BaseHref/blog" title="blog">Blog</a>
 		</li>
+		<li class="nav-item">
+			<a class="nav-link" href="$BaseHref/contact" title="contact">Contact</a>
+		</li>
 	</ul>
 </nav>

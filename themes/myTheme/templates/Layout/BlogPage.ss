@@ -3,11 +3,11 @@
         <div class="col-12">
             <h1 class="mb-5">$Title</h1>
             
-            <% if $Content %>
+            <%-- <% if $Content %>
                 <div class="mb-4">
                     $Content
                 </div>
-            <% end_if %>
+            <% end_if %> --%>
             
             <% if $Posts %>
                 <div class="row">
