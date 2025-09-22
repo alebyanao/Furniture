@@ -73,7 +73,8 @@ namespace {
             return [
                 "IsLoggedIn" => $this->isLoggedIn(),
                 "CurrentUser" => $this->getCurrentUser(),
-                "WishlistCount" => $this->getWishlistCount() // tambahkan ini juga
+                "WishlistCount" => $this->getWishlistCount(),
+                "CartCount" => $this->getCartCount() // tambahkan ini juga
             ];
         }
 
@@ -115,11 +116,13 @@ namespace {
             return Security::getCurrentUser() ? true : false;
         }
 
-        // di PageController.php atau Page.php
-        public function FilteredMenu($level = 1) 
+         public function getCartCount()
         {
-            $menu = $this->Menu($level);
-            return $menu->exclude('URLSegment', 'cart');
+            $user = Security::getCurrentUser();
+            if ($user && $user->exists()) {
+                return CartItem::get()->filter('MemberID', $user->ID)->count();
+            }
+            return 0;
         }
         
     }

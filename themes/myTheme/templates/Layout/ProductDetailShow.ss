@@ -49,11 +49,23 @@
             <% if $hasDiscount %>
               <div class="d-flex flex-wrap align-items-baseline">
                 <span class="text-muted text-decoration-line-through me-2 fs-6">$FormattedPrice</span>
-                <span class="fw-bold fs-4 fs-md-3" style="color:#c4965c;">$FormattedDiscountPrice</span>
+                <span class="fw-bold fs-4 fs-md-3" style="color:#c4965c;" id="unit-price" data-price="$DiscountPrice">$FormattedDiscountPrice</span>
               </div>
             <% else %>
-              <span class="fw-bold fs-4 fs-md-3" style="color:#c4965c;">$FormattedPrice</span>
+              <span class="fw-bold fs-4 fs-md-3" style="color:#c4965c;" id="unit-price" data-price="$Price">$FormattedPrice</span>
             <% end_if %>
+            
+            <!-- Total Price Display -->
+            <div class="mt-2">
+              <small class="text-muted">Total: </small>
+              <span class="fw-bold fs-5" style="color:#c4965c;" id="total-price">
+                <% if $hasDiscount %>
+                  $FormattedDiscountPrice
+                <% else %>
+                  $FormattedPrice
+                <% end_if %>
+              </span>
+            </div>
           </div>
 
           <!-- Quantity Cart-->
@@ -65,23 +77,14 @@
               <div class="d-flex align-items-center gap-2 flex-wrap w-100 w-sm-auto">
                 <div class="input-group rounded-pill border overflow-hidden flex-shrink-0" style="width: 120px; max-width: 120px;">
                   <button class="btn btn-outline-secondary border-0 px-2" type="button" onclick="changeQuantity(-1)">-</button>
-                  <input type="number" id="quantity" class="form-control text-center border-0 px-1" value="1" min="1" max="$Stock" readonly style="font-size: 14px;">
+                  <input type="number" id="quantity" class="form-control text-center border-0 px-1" value="1" min="1" max="$Stock" onchange="updateTotalPrice()" style="font-size: 14px;">
                   <button class="btn btn-outline-secondary border-0 px-2" type="button" onclick="changeQuantity(1)">+</button>
                 </div>
 
                 <div class="d-flex gap-2">
-                  <button class="btn text-white fw-bold px-3 px-md-4 rounded-pill" style="background-color: #c4965c; font-size: 14px;" onclick="addToCartFromProduct()">keranjang</button>
-
-                  <%-- <button type="button"
-                          class="btn btn-outline-secondary rounded-pill d-flex align-items-center justify-content-center"
-                          style="width: 40px; height: 38px;"
-                          title="Add to Wishlist"
-                          onclick="window.location.href='{$BaseHref}/wishlist/add/$ID'">
-                          <i class="far fa-heart"></i>
-                  </button>   --%>
+                  <button class="btn text-white fw-bold px-3 px-md-4 rounded-pill" style="background-color: #c4965c; font-size: 14px;" onclick="addToCart()">keranjang</button>
 
                   <% if $IsInWishlist %>
-                      <!-- Produk sudah di wishlist - heart merah penuh -->
                       <button type="button"
                               class="btn btn-outline-secondary rounded-pill d-flex align-items-center justify-content-center"
                               style="width: 40px; height: 38px; background-color: #ff6b6b; border-color: #ff6b6b;"
@@ -90,7 +93,6 @@
                               <i class="fas fa-heart" style="color: white;"></i>
                       </button>
                   <% else %>
-                      <!-- Produk belum di wishlist - heart kosong -->
                       <button type="button"
                               class="btn btn-outline-secondary rounded-pill d-flex align-items-center justify-content-center"
                               style="width: 40px; height: 38px;"
@@ -99,7 +101,6 @@
                               <i class="far fa-heart"></i>
                       </button>
                   <% end_if %>
-                  
                 </div>
               </div>
             </div>
@@ -109,7 +110,6 @@
             </div>
             <% end_if %>
           </div>
-
         </div>
       </div>
     </div>
@@ -117,9 +117,19 @@
   </div>
 </div>
 
+<!-- User Message Display -->
+<% if $getUserMessage %>
+<div class="container mt-3">
+  <div class="alert alert-info alert-dismissible fade show" role="alert">
+    $getUserMessage
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+</div>
+<% end_if %>
+
 <div class="container">
   <hr class="my-5">
-
+<%-- 
 <div class="related-product mt-5">
         <h3 class="fw-bold mb-4">Produk Lainnya</h3>
         <div class="row">
@@ -167,7 +177,7 @@
                 </div>
             </div>
         </div>
-        <% end_loop %>
+        <% end_loop %> --%>
         <% if not $Product %>
         <div class="col-12">
             <div class="alert alert-info text-center">
@@ -180,6 +190,21 @@
 </div>
 
 <script>
+// Format rupiah function
+function formatRupiah(number) {
+    return 'Rp ' + new Intl.NumberFormat('id-ID').format(number);
+}
+
+// Update total price display
+function updateTotalPrice() {
+    const quantity = parseInt(document.getElementById("quantity").value) || 1;
+    const unitPrice = parseFloat(document.getElementById("unit-price").getAttribute('data-price')) || 0;
+    const totalPrice = unitPrice * quantity;
+    
+    document.getElementById("total-price").textContent = formatRupiah(totalPrice);
+}
+
+// Change quantity function
 function changeQuantity(change) {
     const input = document.getElementById("quantity");
     let currentValue = parseInt(input.value) || 1;
@@ -191,88 +216,20 @@ function changeQuantity(change) {
     if (newValue > maxStock) newValue = maxStock;
     
     input.value = newValue;
+    updateTotalPrice();
 }
 
-function addToCartFromProduct() {
+// Add to cart function - simple redirect with quantity
+function addToCart() {
     const quantity = parseInt(document.getElementById("quantity").value) || 1;
     const productId = <% with $Product %>$ID<% end_with %>;
     
-    // Show loading state
-    const btn = event.target;
-    const originalText = btn.textContent;
-    btn.textContent = 'Adding...';
-    btn.disabled = true;
-    
-    // Try multiple possible cart URLs
-    const possibleUrls = [
-        '/cart/addToCart',
-        '/cart/addToCart/',
-        window.location.origin + '/cart/addToCart',
-        window.location.protocol + '//' + window.location.host + '/cart/addToCart'
-    ];
-    
-    const formData = new FormData();
-    formData.append('ProductID', productId);
-    formData.append('Quantity', quantity);
-    
-    // Try the first URL, if it fails, the error handling will show details
-    fetch(possibleUrls[0], {
-        method: 'POST',
-        body: formData,
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest'
-        }
-    })
-    .then(response => {
-        console.log('Response status:', response.status);
-        console.log('Response headers:', response.headers);
-        
-        // Check if response is OK
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        // Check if response is JSON
-        const contentType = response.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
-            throw new Error('Response is not JSON');
-        }
-        
-        return response.json();
-    })
-    .then(data => {
-        // Reset button
-        btn.textContent = originalText;
-        btn.disabled = false;
-        
-        if (data.success) {
-            alert(data.message);
-            // Reset quantity to 1
-            document.getElementById("quantity").value = 1;
-            
-            // Ask if user wants to continue shopping or go to cart
-            if (confirm('Item added to cart! Do you want to view your cart now?')) {
-                window.location.href = '/cart/';
-            }
-        } else {
-            alert(data.message);
-        }
-    })
-    .catch(error => {
-        // Reset button
-        btn.textContent = originalText;
-        btn.disabled = false;
-        
-        console.error('Detailed error:', error);
-        console.error('Error message:', error.message);
-        
-        // Show more detailed error message
-        alert('Error details: ' + error.message + '\nPlease check the browser console for more information.');
-        
-        // Try alternative: redirect to cart page with product info
-        if (confirm('Would you like to try adding to cart via page redirect?')) {
-            window.location.href = `/cart/addToCart?ProductID=${productId}&Quantity=${quantity}`;
-        }
-    });
+    // Simple redirect to cart add with quantity parameter
+    window.location.href = `$BaseHref/cart/add/${productId}/${quantity}`;
 }
+
+// Initialize total price on page load
+document.addEventListener('DOMContentLoaded', function() {
+    updateTotalPrice();
+});
 </script>

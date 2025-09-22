@@ -14,6 +14,8 @@ class WishlistPageController extends PageController
 
     private static $url_segment = 'wishlist';
 
+    private static $table_name = 'wishlist';
+
     private static $url_handlers = [
         'product/$ID' => 'product',
         'add/$ID' => 'add',

@@ -27,7 +27,6 @@
                 <!-- Product Info -->
                 <div class="col-12 col-md-5 col-lg-6">
                     <div class="card-body">
-                        <p class="mb-1 text-muted small">Kategori: $Product.FirstCategoryName</p>
                         <h5 class="card-title mb-2 fw-bold">$Product.Name</h5>
                         
                         <!-- Stock Status -->
@@ -67,7 +66,7 @@
                     <div class="card-body text-center text-md-end">
                         <div class="d-flex flex-column gap-2">
                             <%-- UBAH SUPAYA PERGI KE CART BUKAN KE DETAIL --%>
-                            <a href="$BaseHref/shop" class="btn btn-sm text-white fw-bold rounded-pill" style="background-color: #c4965c;">Keranjang</a> 
+                            <a href="$BaseHref/cart/add/$Product.ID" class="btn btn-sm text-white fw-bold rounded-pill" style="background-color: #c4965c;">Keranjang</a> 
                             <a href="$BaseHref/wishlist/remove/$ID" class="btn btn-sm btn-outline-danger rounded-pill" onclick="return confirm('Apakah Anda yakin ingin menghapus item ini dari Wishlist Anda?')">Hapus dari Wishlist </a>
                         </div>
                     </div>
