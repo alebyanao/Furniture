@@ -41,28 +41,36 @@
                                 <% end_if %>
                                 
                                 <div class="d-flex align-items-center justify-content-center h-100">
-                                    <% if $Product.Image %>
-                                    <img src="$Product.Image.FitMax(120,80).URL" alt="$Product.Name" class="img-fluid" style="max-height: 150px; max-width: 150px; object-fit: contain;">
-                                    <% else %>
-                                    <!-- Cushion SVG placeholder -->
-                                    <svg width="80" height="50" viewBox="0 0 80 50" fill="none">
-                                        <rect x="5" y="15" width="70" height="20" rx="10" fill="#e0e0e0"/>
-                                        <rect x="15" y="12" width="50" height="26" rx="13" fill="#ccc"/>
-                                        <!-- Cushion legs -->
-                                        <rect x="20" y="32" width="4" height="10" fill="#999"/>
-                                        <rect x="56" y="32" width="4" height="10" fill="#999"/>
-                                    </svg>
-                                    <% end_if %>
+                                     <a onclick="window.location.href='$Top.Link(product)/$Product.ID'" class="d-block" style="text-decoration: none; cursor: pointer;">
+                                        <% if $Product.Image %>
+                                        <img src="$Product.Image.FitMax(100,100).URL" alt="$Product.Name" class="img-fluid" style="max-height: 140px; max-width: 100%; object-fit: contain; transition: transform 0.2s ease;">
+                                        <% else %>
+                                        <!-- No Image Placeholder -->
+                                        <svg width="80" height="50" viewBox="0 0 80 50" fill="none">
+                                            <rect x="5" y="15" width="70" height="20" rx="10" fill="#e0e0e0"/>
+                                            <rect x="15" y="12" width="50" height="26" rx="13" fill="#ccc"/>
+                                            <rect x="20" y="32" width="4" height="10" fill="#999"/>
+                                            <rect x="56" y="32" width="4" height="10" fill="#999"/>
+                                        </svg>
+                                        <% end_if %>
+                                    </a>
                                 </div>
                             </div>
                             <div>
-                                <h6 class="mb-0 fw-bold">$Product.Name</h6>
+                                <!-- Clickable Product Name -->
+                                <h6 class="mb-0 fw-bold">
+                                    <a onclick="window.location.href='$Top.Link(product)/$Product.ID'" style="text-decoration: none; color: inherit; cursor: pointer;">
+                                        $Product.Name
+                                    </a>
+                                </h6>
                                 <small class="text-muted">Stok: $Product.Stock</small>
-                                <% if $Product.AverageRating %>
-                                        <span class="text-warning">★ $Product.AverageRating</span>
-                                <% else %>
-                                        <span class="text-warning">★ 0</span>
-                                <% end_if %>
+                                <div class="mt-1">
+                                    <% if $Product.AverageRating %>
+                                    <span class="text-warning small">★ $Product.AverageRating</span>
+                                    <% else %>
+                                    <span class="text-warning small">★ 0</span>
+                                    <% end_if %>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -173,6 +181,21 @@
     </div>
     <% end_if %>
 </div>
+
+<style>
+/* Hover effects for clickable elements */
+a[onclick]:hover {
+    opacity: 0.8;
+}
+
+.cart-item h6 a:hover {
+    color: #c4965c !important;
+}
+
+.cart-item:hover img {
+    transform: scale(1.05);
+}
+</style>
 
 <script>
 // Format rupiah function

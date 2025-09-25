@@ -6,6 +6,7 @@ use SilverStripe\Control\HTTPRequest;
 class CartPageController extends PageController
 {
     private static $allowed_actions = [
+        'product',
         'add',
         'remove',
         'index',
@@ -13,7 +14,8 @@ class CartPageController extends PageController
     ];
     private static $url_segment = 'cart';
     private static $url_handlers = [
-        'add/$ID/$Quantity' => 'add', // modifikasi untuk support quantity
+        'product/$ID' => 'product',
+        'add/$ID/$Quantity' => 'add', // moddifikasi untuk support quantity
         'remove/$ID' => 'remove',
         'update-quantity' => 'updateQuantity',
         '' => 'index'
@@ -218,5 +220,19 @@ class CartPageController extends PageController
     public function getFormattedTotalPrice()
     {
         return 'Rp ' . number_format($this->getTotalPrice(), 0, '.', '.');
+    }
+
+     public function product(HTTPRequest $request)
+    {
+        $id = $request->param('ID');
+        $product = Product::get()->byID($id);
+        
+        if (!$product) {
+            return $this->httpError(404, 'Product not found');
+        }
+        
+        return $this->customise([
+            'Product' => $product
+        ])->renderWith(['ProductDetailShow', 'Page']);
     }
 }

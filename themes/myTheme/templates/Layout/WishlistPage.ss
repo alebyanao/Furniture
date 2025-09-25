@@ -90,7 +90,7 @@
 </div>
 
 <style>
-/* Hover effect for product im~ages */
+/* Hover effect for product im~agese */
 .card:hover img {
     transform: scale(1.05);
 }
