@@ -2,37 +2,37 @@
 
     <!-- Alerts -->
     <% if $Session.PaymentSuccess %>
-        <div class="alert alert-success alert-dismissible fade show">
+        <div class="alert alert-success alert-dismissible fade show mb-3">
             $Session.PaymentSuccess
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     <% end_if %>
     <% if $Session.PaymentError %>
-        <div class="alert alert-danger alert-dismissible fade show">
+        <div class="alert alert-danger alert-dismissible fade show mb-3">
             $Session.PaymentError
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     <% end_if %>
     <% if $Session.ReviewSuccess %>
-        <div class="alert alert-success alert-dismissible fade show">
+        <div class="alert alert-success alert-dismissible fade show mb-3">
             $Session.ReviewSuccess
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     <% end_if %>
     <% if $Session.ReviewError %>
-        <div class="alert alert-danger alert-dismissible fade show">
+        <div class="alert alert-danger alert-dismissible fade show mb-3">
             $Session.ReviewError
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     <% end_if %>
 
-    <div class="row">
+    <div class="row g-4">
         <!-- Order Details -->
-        <div class="col-md-8 mb-3">
-            <div class="card">
+        <div class="col-md-8">
+            <div class="card h-100 shadow-sm">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">$Title</h5>
-                    <div>
+                    <div class="d-flex gap-2">
                         <% if $Order.canBeCancelled %>
                             <a href="$BaseHref/order/cancel/$Order.ID" class="btn btn-danger btn-sm">Batalkan</a>
                         <% end_if %>
@@ -42,39 +42,41 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <p><strong>Kode:</strong> $Order.OrderCode</p>
-                    <p><strong>Status:</strong> $Order.StatusLabel.RAW</p>
-                    <p><strong>Pembayaran:</strong> $Order.PaymentStatusLabel.RAW</p>
-                    <p><strong>Tanggal:</strong> $Order.CreateAt.Nice</p>
-                    <p><strong>Resi:</strong> <span class="text-primary">$Order.TrackingNumber</p>
-                    <% if $Order.ExpiresAt && $Order.canBePaid %>
-                        <p class="text-danger"><strong>Batas:</strong> $Order.ExpiresAt.Nice</p>
-                    <% end_if %>
+                    <div class="mb-3">
+                        <p class="mb-1"><strong>Kode:</strong> $Order.OrderCode</p>
+                        <p class="mb-1"><strong>Status:</strong> $Order.StatusLabel.RAW</p>
+                        <p class="mb-1"><strong>Pembayaran:</strong> $Order.PaymentStatusLabel.RAW</p>
+                        <p class="mb-1"><strong>Tanggal:</strong> $Order.CreateAt.Nice</p>
+                        <p class="mb-1"><strong>Resi:</strong> <span class="text-primary">$Order.TrackingNumber</span></p>
+                        <% if $Order.ExpiresAt && $Order.canBePaid %>
+                            <p class="text-danger mb-0"><strong>Batas:</strong> $Order.ExpiresAt.Nice</p>
+                        <% end_if %>
+                    </div>
 
                     <hr>
-                    <h6>Produk</h6>
+                    <h6 class="mb-3">Produk</h6>
 
                     <% if $OrderItemsWithReview %>
-                        <ul class="list-group mb-3">
+                        <ul class="list-group">
                             <% loop $OrderItemsWithReview %>
-                                <li class="list-group-item">
+                                <li class="list-group-item py-3">
                                     <div class="d-flex justify-content-between align-items-center">
                                         <div class="d-flex align-items-center">
-                                            <a href="$BaseHref/list-product/view/$Item.Product.ID" class="text-decoration-none text-black">
-                                            <% if $Item.Product.Image %>
-                                                <img src="$Item.Product.Image.URL" alt="$Item.Product.Name" class="me-2 rounded" style="width:50px; height:50px; object-fit:cover;">
-                                            <% else %>
-                                                <div class="me-2 bg-light rounded d-flex align-items-center justify-content-center" style="width:50px; height:50px;">
-                                                    <small class="text-muted">Gambar Tidak Ada</small>
-                                                </div>
-                                            <% end_if %>
+                                            <a href="$BaseHref/list-product/view/$Item.Product.ID" class="text-decoration-none text-dark d-flex align-items-center">
+                                                <% if $Item.Product.Image %>
+                                                    <img src="$Item.Product.Image.URL" alt="$Item.Product.Name" class="me-3 rounded" style="width:50px; height:50px; object-fit:cover;">
+                                                <% else %>
+                                                    <div class="me-3 bg-light rounded d-flex align-items-center justify-content-center" style="width:50px; height:50px;">
+                                                        <small class="text-muted">No Image</small>
+                                                    </div>
+                                                <% end_if %>
                                             </a>
                                             <div>
-                                                <strong>$Item.Product.Name</strong><br>
-                                                <small>Rp $Item.FormattedPrice x $Item.Quantity</small>
+                                                <div class="fw-bold">$Item.Product.Name</div>
+                                                <small class="text-muted">Rp $Item.FormattedPrice × $Item.Quantity</small>
                                             </div>
                                         </div>
-                                        <span>Rp $Item.FormattedSubtotal</span>
+                                        <span class="fw-bold">Rp $Item.FormattedSubtotal</span>
                                     </div>
 
                                     <% if $HasReview %>
@@ -120,12 +122,12 @@
                                             </div>
                                             <div class="mb-3">
                                                 <label class="form-label">Tampilkan Nama Anda?</label>
-                                                <div>
-                                                    <div class="form-check form-check-inline">
+                                                <div class="d-flex gap-3">
+                                                    <div class="form-check">
                                                         <input class="form-check-input" type="radio" name="showname" id="showname-yes-$Item.ID" value="1" checked>
                                                         <label class="form-check-label" for="showname-yes-$Item.ID">Ya</label>
                                                     </div>
-                                                    <div class="form-check form-check-inline">
+                                                    <div class="form-check">
                                                         <input class="form-check-input" type="radio" name="showname" id="showname-no-$Item.ID" value="0">
                                                         <label class="form-check-label" for="showname-no-$Item.ID">Tidak</label>
                                                     </div>
@@ -142,33 +144,32 @@
                             <% end_loop %>
                         </ul>
                     <% else %>
-                        <div class="alert alert-warning">
+                        <div class="alert alert-warning mb-0">
                             Tidak ada item dalam pesanan ini.
                         </div>
                     <% end_if %>
-
                 </div>
             </div>
         </div>
 
         <!-- Payment Summary -->
-        <div class="col-md-4 mb-3">
-            <div class="card">
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-3">
                 <div class="card-header">Ringkasan</div>
                 <div class="card-body">
-                    <p class="d-flex justify-content-between"><span>Subtotal</span><span>$Order.FormattedTotalPrice</span></p>
-                    <p class="d-flex justify-content-between"><span>Ongkir</span><span>$Order.FormattedShippingCost</span></p>
-                    <p class="d-flex justify-content-between"><span>Biaya Pembayaran</span><span>$Order.FormattedPaymentFee</span></p>
+                    <p class="d-flex justify-content-between mb-1"><span>Subtotal</span><span>$Order.FormattedTotalPrice</span></p>
+                    <p class="d-flex justify-content-between mb-1"><span>Ongkir</span><span>$Order.FormattedShippingCost</span></p>
+                    <p class="d-flex justify-content-between mb-1"><span>Biaya Pembayaran</span><span>$Order.FormattedPaymentFee</span></p>
                     <hr>
-                    <p class="d-flex justify-content-between fw-bold"><span>Total</span><span>$Order.FormattedGrandTotal</span></p>
+                    <p class="d-flex justify-content-between fw-bold mb-0"><span>Total</span><span>$Order.FormattedGrandTotal</span></p>
 
                     <% if $Order.canBePaid %>
-                        <a href="$BaseHref/payment/initiate/$Order.ID" target="_blank" class="btn btn-success w-100 mt-2">Bayar Sekarang</a>
+                        <a href="$BaseHref/payment/initiate/$Order.ID" target="_blank" class="btn btn-success w-100 mt-3">Bayar Sekarang</a>
                     <% end_if %>
                 </div>
             </div>
 
-            <div class="card mt-3">
+            <div class="card shadow-sm mb-3">
                 <div class="card-header">Alamat</div>
                 <div class="card-body small">
                     <p class="mb-1"><strong>$Order.ShippingAddress.ReceiverName</strong></p>
@@ -177,22 +178,23 @@
                     <p class="mb-0">$Order.ShippingAddress.CityName, $Order.ShippingAddress.ProvinceName $Order.ShippingAddress.PostalCode</p>
                 </div>
             </div>
+
             <% if $Order.PaymentStatus == 'paid' %>
-                <div class="card mt-3">
+                <div class="card shadow-sm">
                     <div class="card-header">
-                        <h5 class="mb-0">Tagihan & Dokumen</h5>
+                        <h6 class="mb-0">Tagihan & Dokumen</h6>
                     </div>
                     <div class="card-body">
                         <p class="text-muted mb-3">Unduh atau kirim ulang Tagihan untuk pesanan ini</p>
                         <div class="d-flex flex-wrap gap-2">
-                            <a href="$BaseHref/invoice/download/$Order.ID" class="btn btn-primary">
-                                <i class="fas fa-download me-1"></i> Download Tagihan
+                            <a href="$BaseHref/invoice/download/$Order.ID" class="btn btn-primary btn-sm">
+                                <i class="fas fa-download me-1"></i> Download
                             </a>
-                            <a href="$BaseHref/invoice/send/$Order.ID" class="btn btn-outline-primary">
-                                <i class="fas fa-envelope me-1"></i> Kirim ke Email
+                            <a href="$BaseHref/invoice/send/$Order.ID" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-envelope me-1"></i> Kirim Email
                             </a>
-                            <a href="$BaseHref/invoice/generate/$Order.ID" target="_blank" class="btn btn-outline-secondary">
-                                <i class="fas fa-eye me-1"></i> Lihat Tagihan
+                            <a href="$BaseHref/invoice/generate/$Order.ID" target="_blank" class="btn btn-outline-secondary btn-sm">
+                                <i class="fas fa-eye me-1"></i> Lihat
                             </a>
                         </div>
                     </div>
@@ -201,6 +203,7 @@
         </div>
     </div>
 </div>
+
 <style>
     .star-rating {
         display: flex;
@@ -221,6 +224,7 @@
         color: #f1c40f;
     }
 </style>
+
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         document.querySelectorAll('.star-rating').forEach(function (container) {
@@ -237,7 +241,7 @@
                     });
                 });
 
-                // Optional: hover effect
+                // Efek hover (opsional)
                 star.addEventListener('mouseover', function () {
                     const hoverValue = this.getAttribute('data-value');
                     stars.forEach(function (s) {
