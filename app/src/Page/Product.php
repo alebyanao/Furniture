@@ -1,6 +1,5 @@
 <?php
 
-use App\Page\HomePage;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Assets\Image;
 use SilverStripe\Forms\TextField;

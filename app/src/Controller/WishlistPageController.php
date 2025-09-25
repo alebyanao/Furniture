@@ -5,6 +5,7 @@ use SilverStripe\Control\HTTPRequest;
 class WishlistPageController extends PageController
 {
 
+    
     private static $allowed_actions = [
         'product',
         'add',
@@ -87,6 +88,20 @@ class WishlistPageController extends PageController
         }
 
         return $this->redirectBack();
+    }
+
+    public function product(HTTPRequest $request)
+    {
+        $id = $request->param('ID');
+        $product = Product::get()->byID($id);
+        
+        if (!$product) {
+            return $this->httpError(404, 'Product not found');
+        }
+        
+        return $this->customise([
+            'Product' => $product
+        ])->renderWith(['ProductDetailShow', 'Page']);
     }
 
 }
