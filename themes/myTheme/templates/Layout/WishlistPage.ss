@@ -32,20 +32,14 @@
                         <!-- Stock Status -->
                         <p class="mb-2 fs-6"><strong>Stok :</strong> $Product.Stock</p>
 
-                        
-                        <!-- Rating -->
-                        <div class="rating-section mb-2">
-                            <div class="text-warning" style="font-size: 16px;">
-                                $Product.StarRating
-                            </div>
-                            <small class="text-muted">
-                                <% if $Product.ReviewCount > 0 %>
-                                    ($Product.AverageRating/5) - $Product.ReviewCount review<% if $Product.ReviewCount > 1 %>s<% end_if %>
-                                <% else %>
-                                    No reviews yet
-                                <% end_if %>
-                            </small>
-                        </div>
+                        <%-- Rating di Wishlist --%>
+                        <p class="mb-1 text-warning">
+                            <% if $Product.AverageRating %>
+                                ★ $Product.AverageRating <span class="text-muted">($Product.Review.Count Ulasan)</span>
+                            <% else %>
+                                ★ 0 <span class="text-muted">(0 Ulasan)</span>
+                            <% end_if %>
+                        </p>
                         
                         <!-- Price -->
                         <div class="price-section">
@@ -65,7 +59,7 @@
                 <div class="col-12 col-md-3 col-lg-3">
                     <div class="card-body text-center text-md-end">
                         <div class="d-flex flex-column gap-2">
-                            <%-- UBAH SUPAYA PERGI KE CART BUKAN KE DETAIL --%>
+                          
                             <a href="$BaseHref/cart/add/$Product.ID" class="btn btn-sm text-white fw-bold rounded-pill" style="background-color: #c4965c;">Keranjang</a> 
                             <a href="$BaseHref/wishlist/remove/$ID" class="btn btn-sm btn-outline-danger rounded-pill" onclick="return confirm('Apakah Anda yakin ingin menghapus item ini dari Wishlist Anda?')">Hapus dari Wishlist </a>
                         </div>

@@ -58,6 +58,11 @@
                             <div>
                                 <h6 class="mb-0 fw-bold">$Product.Name</h6>
                                 <small class="text-muted">Stok: $Product.Stock</small>
+                                <% if $Product.AverageRating %>
+                                        <span class="text-warning">★ $Product.AverageRating</span>
+                                <% else %>
+                                        <span class="text-warning">★ 0</span>
+                                <% end_if %>
                             </div>
                         </div>
                     </div>

@@ -1,23 +1,13 @@
 <?php
 
-use SilverStripe\CMS\Model\SiteTree;
-use SilverStripe\CMS\Controllers\ContentController;
 use SilverStripe\Control\HTTPRequest;
-use SilverStripe\Forms\Form;
-use SilverStripe\Forms\FieldList;
-use SilverStripe\Forms\TextField;
-use SilverStripe\Forms\EmailField;
-use SilverStripe\Forms\TextareaField;
-use SilverStripe\Forms\DropdownField;
-use SilverStripe\Forms\HiddenField;
-use SilverStripe\Forms\FormAction;
-use SilverStripe\Forms\RequiredFields;
+use SilverStripe\Security\Member;
 
-class ProductPage extends SiteTree 
+class ProductPage extends Page 
 {
     private static $table_name = 'ProductPage';
 }
-class ProductPageController extends ContentController
+class ProductPageController extends PageController
 {
     private static $url_handlers = [
     'product/$ID' => 'product'
@@ -25,8 +15,11 @@ class ProductPageController extends ContentController
 
     private static $allowed_actions = [
         'product',
-        'ReviewForm',
-        'submitreview'
+    ];
+
+    private static $has_one = [
+        "Product" => Product::class,
+        "Member" => Member::class,
     ];
 
     public function hasPromoCards()
@@ -102,69 +95,24 @@ class ProductPageController extends ContentController
         ])->renderWith(['ProductDetailShow', 'Page']);
     }
 
-    public function ReviewForm()
+    public function getAverageRating()
     {
-        $productID = $this->getRequest()->getVar('product');
-        
-        $fields = FieldList::create([
-            HiddenField::create('ProductID', 'ProductID', $productID),
-            TextField::create('CustomerName', 'Your Name'),
-            EmailField::create('CustomerEmail', 'Your Email'),
-            DropdownField::create('Rating', 'Rating', [
-                '5' => '5 Stars - Excellent',
-                '4' => '4 Stars - Very Good',
-                '3' => '3 Stars - Good',
-                '2' => '2 Stars - Fair',
-                '1' => '1 Star - Poor'
-            ])->setEmptyString('Select Rating'),
-            TextareaField::create('Comment', 'Your Review')
-                ->setRows(4)
-                ->setAttribute('placeholder', 'Write your review here...')
-        ]);
-
-        $actions = FieldList::create([
-            FormAction::create('submitreview', 'Submit Review')
-                ->addExtraClass('btn btn-primary')
-        ]);
-
-        $validator = RequiredFields::create([
-            'CustomerName',
-            'CustomerEmail', 
-            'Rating',
-            'Comment'
-        ]);
-
-        return Form::create($this, 'ReviewForm', $fields, $actions, $validator);
-    }
-
-    public function submitreview($data, Form $form)
-    {
-        $product = Product::get()->byID($data['ProductID']);
-        
-        if (!$product) {
-            $form->sessionMessage('Product not found', 'bad');
-            return $this->redirectBack();
+        $reviews = $this->Review();
+        if ($reviews->count() == 0) {
+            return null;
         }
 
-        $review = ProductReview::create();
-        $review->ProductID = $data['ProductID'];
-        $review->CustomerName = $data['CustomerName'];
-        $review->CustomerEmail = $data['CustomerEmail'];
-        $review->Rating = $data['Rating'];
-        $review->Comment = $data['Comment'];
-        $review->IsApproved = false;
-        $review->write();
+        $totalRating = 0;
+        foreach ($reviews as $review) {
+            $totalRating += $review->Rating;
+        }
 
-        $form->sessionMessage(
-            'Thank you for your review! It will be published after admin approval.', 
-            'good'
-        );
-
-        return $this->redirect($this->Link() . 'product/' . $data['ProductID']);
+        $average = $totalRating / $reviews->count();
+        return number_format($average, 1);
     }
 
     public function index() {
         return $this->renderWith(['ProductPage', 'Page']);
     }
-    
+
 }

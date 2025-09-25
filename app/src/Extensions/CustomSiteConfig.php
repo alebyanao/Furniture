@@ -8,6 +8,7 @@ use SilverStripe\Forms\TextareaField;
 use SilverStripe\Forms\CheckboxField;
 use SilverStripe\Forms\EmailField;
 use SilverStripe\ORM\DataExtension;
+use SilverStripe\Forms\DropdownField;
 
 class CustomSiteConfig extends DataExtension
 {
@@ -18,6 +19,10 @@ class CustomSiteConfig extends DataExtension
         'CompanyAddress' => 'Text',
         'CompanyWorkingHours' => 'Varchar(100)',
         'CompanyMapURL' => 'Varchar(255)',
+        'CompanyProvinceID' => 'Int',
+        'CompanyCityID' => 'Int',
+        'CompanyDistricID' => 'Int',
+        'CompanyPostalCode' => 'Int',
         
         // Top Bar
         'TopBarText' => 'Text',
@@ -90,6 +95,10 @@ class CustomSiteConfig extends DataExtension
 
     public function updateCMSFields(FieldList $fields)
     {
+        $provinceOptions = $this->getProvinceOptions();
+        $cityOptions = $this->getCityOptions();
+        $districtOptions = $this->getDistrictOptions();
+
         $fields->addFieldsToTab('Root.Main', [
             // Company Info
             EmailField::create('CompanyEmail', 'Company Email'),
@@ -97,10 +106,21 @@ class CustomSiteConfig extends DataExtension
             TextareaField::create('CompanyAddress', 'Company Address')->setRows(4),
             TextField::create('CompanyWorkingHours', 'Working Hours'),
             TextField::create('CompanyMapURL', 'Google Maps URL'),
+
+            // Company Addres
+            DropdownField::create('CompanyProvinceID', 'Provinsi Perusahaan', $provinceOptions)
+                ->setEmptyString('Pilih Provinsi'),
+            DropdownField::create('CompanyCityID', 'Kota/Kabupaten Perusahaan', $cityOptions)
+                ->setEmptyString('Pilih Kota/Kabupaten'),
+            DropdownField::create('CompanyDistricID', 'Kecamatan Perusahaan', $districtOptions)
+                ->setEmptyString('Pilih Kecamatan'),
             
             // Top Bar
             CheckboxField::create('TopBarEnabled', 'Enable Top Bar'),
             TextareaField::create('TopBarText', 'Top Bar Text')->setRows(2),
+            
+            // Contact & Location
+            TextareaField::create('ContactDescription', 'Contact Description')->setRows(3),
             
             // Footer
             UploadField::create('FooterLogo', 'Footer Logo')
@@ -109,8 +129,6 @@ class CustomSiteConfig extends DataExtension
             TextareaField::create('FooterDescription', 'Footer Description')->setRows(3),
             TextField::create('FooterCopyrightText', 'Copyright Text'),
             
-            // Contact & Location
-            TextareaField::create('ContactDescription', 'Contact Description')->setRows(3),
             
             // Social Media
             TextField::create('FacebookURL', 'Facebook URL'),
@@ -158,5 +176,129 @@ class CustomSiteConfig extends DataExtension
         ]);
 
         return $fields;
+    }
+
+    
+    private function getProvinceOptions()
+    {
+        try {
+            $rajaOngkir = new RajaOngkirService();
+            $provinces = $rajaOngkir->getProvinces();
+            
+            $options = [];
+            foreach ($provinces as $province) {
+                $options[$province['id']] = $province['name'];
+            }
+            
+            return $options;
+        } catch (Exception $e) {
+            return [];
+        }
+    }
+
+    private function getCityOptions()
+    {
+        if (!$this->owner->CompanyProvinceID) {
+            return [];
+        }
+
+        try {
+            $rajaOngkir = new RajaOngkirService();
+            $cities = $rajaOngkir->getCities($this->owner->CompanyProvinceID);
+            
+            $options = [];
+            foreach ($cities as $city) {
+                $options[$city['id']] = $city['name'];
+            }
+            
+            return $options;
+        } catch (Exception $e) {
+            return [];
+        }
+    }
+
+    private function getDistrictOptions()
+    {
+        if (!$this->owner->CompanyCityID) {
+            return [];
+        }
+
+        try {
+            $rajaOngkir = new RajaOngkirService();
+            $districts = $rajaOngkir->getDistricts($this->owner->CompanyCityID);
+            
+            $options = [];
+            foreach ($districts as $district) {
+                $options[$district['id']] = $district['name'];
+            }
+            
+            return $options;
+        } catch (Exception $e) {
+            return [];
+        }
+    }
+
+    private function getAddressScript()
+    {
+        return '
+        <script>
+        (function() {
+            function updateCascadingDropdowns() {
+                var provinceSelect = document.querySelector("#Form_EditForm_CompanyProvinceID");
+                var citySelect = document.querySelector("#Form_EditForm_CompanyCityID");
+                var districtSelect = document.querySelector("#Form_EditForm_CompanyDistricID");
+                
+                if (!provinceSelect || !citySelect || !districtSelect) return;
+                
+                provinceSelect.addEventListener("change", function() {
+                    var provinceId = this.value;
+                    
+                    // Clear dependent dropdowns
+                    citySelect.innerHTML = "<option value=\\"\\">Pilih Kota/Kabupaten</option>";
+                    districtSelect.innerHTML = "<option value=\\"\\">Pilih Kecamatan</option>";
+                    
+                    if (provinceId) {
+                        // Load cities via AJAX
+                        fetch("/checkout/api/cities/" + provinceId)
+                            .then(response => response.json())
+                            .then(data => {
+                                data.forEach(function(city) {
+                                    var option = new Option(city.name, city.id);
+                                    citySelect.add(option);
+                                });
+                            })
+                            .catch(error => console.error("Error loading cities:", error));
+                    }
+                });
+                
+                citySelect.addEventListener("change", function() {
+                    var cityId = this.value;
+                    
+                    // Clear district dropdown
+                    districtSelect.innerHTML = "<option value=\\"\\">Pilih Kecamatan</option>";
+                    
+                    if (cityId) {
+                        // Load districts via AJAX
+                        fetch("/checkout/api/districts/" + cityId)
+                            .then(response => response.json())
+                            .then(data => {
+                                data.forEach(function(district) {
+                                    var option = new Option(district.name, district.id);
+                                    districtSelect.add(option);
+                                });
+                            })
+                            .catch(error => console.error("Error loading districts:", error));
+                    }
+                });
+            }
+            
+            // Initialize when DOM is ready
+            if (document.readyState === "loading") {
+                document.addEventListener("DOMContentLoaded", updateCascadingDropdowns);
+            } else {
+                updateCascadingDropdowns();
+            }
+        })();
+        </script>';
     }
 }

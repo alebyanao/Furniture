@@ -1,17 +1,18 @@
-<% if $flashMessages %>
-<div class="alert alert-$flashMessages.Type alert-dismissible fade show" role="alert">
-    $flashMessages.Message
-    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-</div>
-<% end_if %>
 
 <main class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
     <form action="$BaseHref/auth/register" method="POST" class="w-100 p-4 border rounded shadow-sm" style="max-width: 500px;">
         <h4 class="mb-3">Daftar</h4>
-        
+
+        <% if $flashMessages %>
+        <div class="alert alert-$flashMessages.Type alert-dismissible fade show" role="alert">
+            $flashMessages.Message
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <% end_if %>
+
         <% if $ValidationResult && not $ValidationResult.IsValid %>
             <% loop $ValidationResult.getMessages %>
-                <div class="alert alert-danger">$Message</div>
+                <div>$Message</div>
             <% end_loop %>
         <% end_if %>
         

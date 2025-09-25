@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Models;
 
-use App\Pages\BlogPage;
+
 use SilverStripe\Assets\Image;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Forms\FieldList;

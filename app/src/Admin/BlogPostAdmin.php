@@ -1,8 +1,5 @@
 <?php
 
-namespace App\Admin;
-
-use App\Models\BlogPost;
 use SilverStripe\Admin\ModelAdmin;
 
 class BlogPostAdmin extends ModelAdmin
@@ -17,7 +14,7 @@ class BlogPostAdmin extends ModelAdmin
 
     private static $menu_icon_class = 'font-icon-news';
 
-    private static $menu_priority = 3;
+
 
     public function getList()
     {

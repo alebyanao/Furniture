@@ -36,19 +36,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// Auto-populate product ID in review form
-document.addEventListener('DOMContentLoaded', function() {
-    const modal = document.getElementById('reviewModal');
-    if (modal) {
-        modal.addEventListener('show.bs.modal', function() {
-            const productIdField = document.querySelector('input[name="ProductID"]');
-            if (productIdField) {
-                productIdField.value = '$Product.ID';
-            }
-        });
-    }
-});
-
 // Unified Carousel functionality with Auto-play
 let carouselPositions = {};
 let carouselIntervals = {};

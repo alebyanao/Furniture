@@ -1,9 +1,7 @@
 <?php
 
-use App\Models\BlogPost;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\ORM\PaginatedList;
-use SilverStripe\Forms\LiteralField;
 
 class BlogPage extends Page
 {

@@ -44,6 +44,17 @@
             </div>
           </div>
 
+          <!-- Rating product detail -->
+        <div class="mb-2">
+            <% if $Product.AverageRating %>
+            <span class="text-warning">★ $Product.AverageRating</span>
+            <span class="text-muted">($Product.Review.Count Ulasan)</span>
+            <% else %>
+            <span class="text-warning">★ 0</span>
+            <span class="text-muted">(0 Ulasan)</span>
+            <% end_if %>
+        </div>
+
           <!-- Price -->
           <div class="mb-3 mb-md-4">
             <% if $hasDiscount %>
@@ -117,7 +128,7 @@
   </div>
 </div>
 
-<!-- User Message Display -->
+<!-- User Message Display 
 <% if $getUserMessage %>
 <div class="container mt-3">
   <div class="alert alert-info alert-dismissible fade show" role="alert">
@@ -125,59 +136,34 @@
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
   </div>
 </div>
-<% end_if %>
+<% end_if %>-->
 
 <div class="container">
   <hr class="my-5">
-<%-- 
-<div class="related-product mt-5">
-        <h3 class="fw-bold mb-4">Produk Lainnya</h3>
-        <div class="row">
-        <% loop $Products %>
-        <div class="col-lg-3 col-md-4 col-sm-6 col-12 mb-4">
-            <div class="product-card" onclick="window.location.href='$Top.Link(product)/$ID'">
-                <div class="product-image-container position-relative" style="background-color: #fdf8ef; padding: 40px 20px 60px; min-height: 350px;">
-                    <% if $hasDiscount %>
-                    <div class="discount-badge position-absolute" style="top: 15px; left: 15px; background-color: #c4965c; color: white; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold;">
-                        $DiscountPercentage Off
-                    </div>
-                    <% end_if %>
-                    
-                    <% if $Image %>
-                    <img src="$Image.FitMax(160,160).URL" alt="$Name" class="img-fluid" style="max-height: 160px; width: 100%; object-fit: contain;">
-                    <% else %>
-                    <img src="https://via.placeholder.com/160x160/f5f5f5/cccccc?text=No+Image" alt="$Name" class="img-fluid" style="max-height: 160px; width: 100%; object-fit: contain;">
-                    <% end_if %>
+          <!-- Reviews -->
+    <div class="row">
+        <div class="col-12">
+            <h5 class="mb-3">Ulasan Pelanggan</h5>
+            <% if Review && Review.Count > 0 %>
+                <% loop Review %>
+                <div class="mb-4 border rounded p-3">
+                    <strong><% if $ShowName == true %>$Member.FirstName $Member.Surname<% else %>Anonim<% end_if %></strong> 
+                    <span class="text-warning">★ $Rating</span>
+                    <p class="mb-0">
+                        <% if $Message %>$Message<% else %>Tidak ada komentar<% end_if %>
+                    </p>
                 </div>
-                
-                <div class="product-info text-start mt-5">
-                    <h6 class="fw-bold text-dark text-start ms-3 product-name">$Name</h6>
-                    
-                    <div class="rating-section text-start ms-3">
-                        <div class="text-warning" style="font-size: 20px;">
-                            $StarRating
-                        </div>
-                        <small class="text-muted">
-                            <% if $ReviewCount > 0 %>
-                                ($AverageRating/5) - $ReviewCount review<% if $ReviewCount > 1 %>s<% end_if %>
-                            <% else %>
-                                No reviews yet
-                            <% end_if %>
-                        </small>
+                <% end_loop %>
+            <% else %>
+                <div class="text-center py-5">
+                    <div class="mb-4">
+                        <i class="bi bi-star" style="font-size: 64px; color: #ddd;"></i>
                     </div>
-                    
-                    <div class="price-section text-start ms-3">
-                        <% if $hasDiscount %>
-                        <p class="text-muted mb-0 small text-decoration-line-through">$FormattedPrice</p>
-                        <p class="fw-bold mb-0" style="color: #c4965c">$FormattedDiscountPrice</p>
-                        <% else %>
-                        <p class="fw-bold mb-0" style="color: #c4965c">$FormattedPrice</p>
-                        <% end_if %>
-                    </div>
+                    <h5 class="mb-3">Belum ada ulasan untuk produk ini</h5>
                 </div>
-            </div>
+            <% end_if %>
         </div>
-        <% end_loop %> --%>
+    </div>
         <% if not $Product %>
         <div class="col-12">
             <div class="alert alert-info text-center">

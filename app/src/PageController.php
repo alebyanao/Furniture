@@ -5,6 +5,7 @@ namespace {
     use SilverStripe\CMS\Controllers\ContentController;
     use SilverStripe\Security\Security;
     use SilverStripe\View\ArrayData;
+    use SilverStripe\SiteConfig\SiteConfig;
     // Tambahkan import untuk Wishlist class
     // use App\Model\Wishlist; // sesuaikan dengan namespace Wishlist Anda
 
@@ -74,7 +75,10 @@ namespace {
                 "IsLoggedIn" => $this->isLoggedIn(),
                 "CurrentUser" => $this->getCurrentUser(),
                 "WishlistCount" => $this->getWishlistCount(),
-                "CartCount" => $this->getCartCount() // tambahkan ini juga
+                "CartCount" => $this->getCartCount(),
+                "DeliveryMethod" => DeliveryMethod::get(),
+                "PaymentMethod" => PaymentMethod::get(),
+                "CustomSiteConfig" => SiteConfig::current_site_config(),
             ];
         }
 
@@ -92,6 +96,37 @@ namespace {
             }
             return null;
         }
+
+         /**
+     * Safely get company email from SiteConfig
+     */
+        private function getCompanyEmailSafe($siteConfig)
+        {
+            // First try CompanyEmail from CustomSiteConfig extension
+            if (isset($siteConfig->CompanyEmail) && !empty($siteConfig->CompanyEmail)) {
+                $email = trim($siteConfig->CompanyEmail);
+                if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                    return $email;
+                }
+            }
+
+            // Then try default SiteConfig Email field
+            if (isset($siteConfig->Email) && !empty($siteConfig->Email)) {
+                $emailString = trim($siteConfig->Email);
+                if ($emailString !== '') {
+                    $emails = explode(',', $emailString);
+                    $firstEmail = trim($emails[0]);
+                    if (filter_var($firstEmail, FILTER_VALIDATE_EMAIL)) {
+                        return $firstEmail;
+                    }
+                }
+            }
+
+            // Final fallback - generate from domain
+            $domain = $_SERVER['HTTP_HOST'] ?? 'localhost';
+            return "noreply@{$domain}";
+        }
+
 
         public function getWishlistCount()
         {

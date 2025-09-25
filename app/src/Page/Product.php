@@ -1,5 +1,6 @@
 <?php
 
+use App\Page\HomePage;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Assets\Image;
 use SilverStripe\Forms\TextField;
@@ -17,7 +18,8 @@ class Product extends DataObject
         'Price' => 'Int',
         'Discount' => 'Int',
         'Description' => 'Text',
-        'Stock' => 'Int'
+        'Stock' => 'Int',
+        'Weight' => 'Int',
     ];
 
     private static $has_one = [
@@ -29,8 +31,12 @@ class Product extends DataObject
     ];
 
     private static $has_many = [
-        'Reviews' => 'ProductReview',
-        'Wishlist' => Wishlist::class
+        'HomePage' => HomePage::class,
+        'ProductPage' => ProductPage::class,
+        'Wishlist' => Wishlist::class,
+        'CartItem' => CartItem::class,
+        'OrderItem' => OrderItem::class,
+        'Review' => Review::class
     ];
 
     private static $owns = [
@@ -47,8 +53,7 @@ class Product extends DataObject
         'FormattedPrice' => 'Price',
         'FormattedDiscount' => 'Discount',
         'Stock' => 'Stock',
-        'AverageRating' => 'Rating',
-        'ReviewCount' => 'Reviews'
+        'Weight' => 'Int',
     ];
 
     private static $searchable_fields = [
@@ -65,7 +70,7 @@ class Product extends DataObject
         
         $fields->addFieldsToTab('Root.Main', [
             TextField::create('Name', 'Product Name'),
-            
+            TextField::create('Weight', 'Weight'),
             CheckboxSetField::create('Categories', 'Categories', Category::get()->filter('IsActive', true)->map('ID', 'Name'))
                 ->setDescription('Select one or more categories for this product'),
                 
@@ -139,40 +144,6 @@ class Product extends DataObject
         }
         return 'In Stock';
     }
-
-    public function getAverageRating()
-    {
-        $reviews = $this->Reviews();
-        if ($reviews->count() > 0) {
-            $total = $reviews->sum('Rating');
-            return round($total / $reviews->count(), 1);
-        }
-        return 0;
-    }
-
-    public function getReviewCount()
-    {
-        return $this->Reviews()->count();
-    }
-
-    public function getStarRating()
-    {
-        $rating = $this->getAverageRating();
-        $stars = '';
-        
-        for ($i = 1; $i <= 5; $i++) {
-            if ($i <= $rating) {
-                $stars .= '★';
-            } elseif ($i - 0.5 <= $rating) {
-                $stars .= '★';
-            } else {
-                $stars .= '☆';
-            }
-        }
-        
-        return $stars;
-    }
-
     public function getCategoryNames()
     {
         return $this->Categories()->column('Name');
@@ -210,7 +181,21 @@ class Product extends DataObject
             ->limit($limit);
     }
     
-    // Tambahkan method ini ke file Product.php yang sudah ada
+    public function getAverageRating()
+    {
+        $reviews = $this->Review();
+        if ($reviews->count() == 0) {
+            return null;
+        }
+
+        $totalRating = 0;
+        foreach ($reviews as $review) {
+            $totalRating += $review->Rating;
+        }
+
+        $average = $totalRating / $reviews->count();
+        return number_format($average, 1);
+    }
 
     public function getIsInWishlist()
     {

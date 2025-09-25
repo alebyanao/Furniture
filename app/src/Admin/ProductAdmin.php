@@ -8,7 +8,6 @@ class ProductAdmin extends ModelAdmin
     private static $managed_models = [
         Product::class,
         Category::class,
-        ProductReview::class,
         PromoCard::class  
     ];
 
@@ -30,11 +29,6 @@ class ProductAdmin extends ModelAdmin
         // Sort categories alphabetically
         if ($this->modelClass === Category::class) {
             return $list->sort('Name', 'ASC');
-        }
-        
-        // Sort reviews by newest first
-        if ($this->modelClass === ProductReview::class) {
-            return $list->sort('Created', 'DESC');
         }
         
         // Sort promo cards by sort order, then newest first

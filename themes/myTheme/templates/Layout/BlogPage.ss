@@ -83,9 +83,12 @@
                 <% end_if %>
                 
             <% else %>
-                <div class="alert alert-info" role="alert">
-                    <h4 class="alert-heading">Belum ada berita!</h4>
-                    <p>Belum ada post blog yang tersedia saat ini. Admin dapat menambahkan post baru melalui panel admin.</p>
+                <div class="text-center py-5">
+                    <div class="mb-4">
+                        <i class="bi bi-file-text" style="font-size: 64px; color: #ddd;"></i>
+                    </div>
+                    <h5 class="mb-3">Belum ada berita!</h5>
+                    <p class="text-muted mb-4">Belum ada post blog yang tersedia saat ini. Admin dapat menambahkan post baru melalui panel admin</p>
                 </div>
             <% end_if %>
         </div>

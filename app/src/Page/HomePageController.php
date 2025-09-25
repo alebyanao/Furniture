@@ -1,14 +1,8 @@
 <?php
 
-namespace App\Page;
-
-use App\Models\HeroBanner;
-use PageController;
+use SilverStripe\Security\Member;
 use SilverStripe\ORM\ArrayList;
 use SilverStripe\Control\HTTPRequest;
-use App\Models\FeatureItem;
-use Product;
-use Category;
 
 class HomePageController extends PageController
 {
@@ -18,6 +12,11 @@ class HomePageController extends PageController
     private static $allowed_actions = [
         'product'
     ]; 
+
+    private static $has_one = [
+        "Product" => Product::class,
+        "Member" => Member::class,
+    ];
 
     public function getBestSellersProducts()
     {
@@ -229,12 +228,25 @@ class HomePageController extends PageController
         $features = $this->getFeatureItems();
         return $features && $features->count() > 0;
     }
-
+    public function getAverageRating()
+    {
+        $reviews = $this->Review();
+        if ($reviews->count() == 0) {
+            return null;
+        }
+        
+        $totalRating = 0;
+        foreach ($reviews as $review) {
+            $totalRating += $review->Rating;
+        }
+        
+        $average = $totalRating / $reviews->count();
+        return number_format($average, 1);
+    }
     public function index()
     {
         return $this->renderWith(['HomePage', 'Page']);
     }
-
     public function product(HTTPRequest $request)
     {
         $id = $request->param('ID');
@@ -243,7 +255,7 @@ class HomePageController extends PageController
         if (!$product) {
             return $this->httpError(404, 'Product not found');
         }
-
+        
         return $this->customise([
             'Product' => $product
         ])->renderWith(['ProductDetailShow', 'Page']);

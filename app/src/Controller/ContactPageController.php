@@ -9,6 +9,7 @@ use SilverStripe\Forms\Form;
 use SilverStripe\Forms\FormAction;
 use SilverStripe\Forms\RequiredFields;
 use SilverStripe\SiteConfig\SiteConfig;
+use SilverStripe\Security\Security;
 
 class ContactPageController extends PageController
 {
@@ -56,6 +57,14 @@ class ContactPageController extends PageController
             return $this->redirectBack();
         }
 
+        // Tentukan email pengirim
+        $member = Security::getCurrentUser();
+        if ($member && $member->Email) {
+            $from = $member->Email; // email user yang login
+        } else {
+            $from = $data['Email']; // email dari input form
+        }
+
         $subject = 'Pesan Kontak dari ' . $data['Name'];
         $body = sprintf(
             "Nama: %s\nEmail: %s\n\nPesan:\n%s",
@@ -64,15 +73,18 @@ class ContactPageController extends PageController
             $data['Message']
         );
 
-        Email::create()
+        $email = Email::create()
             ->setTo($to)
-            ->setFrom($data['Email'])
+            ->setFrom($from)
             ->setSubject($subject)
-            ->setBody(nl2br($body))
-            ->send();
+            ->setBody(nl2br($body));
+
+        // tambahkan reply-to supaya admin bisa langsung balas
+        $email->setReplyTo($data['Email']);
+
+        $email->send();
 
         $form->sessionMessage('Pesan berhasil dikirim. Terima kasih sudah menghubungi kami!', 'good');
-
         return $this->redirectBack();
     }
 }

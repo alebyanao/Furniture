@@ -30,6 +30,33 @@ class AuthPageController extends PageController
         'reset-password' => 'resetPassword'
     ];
 
+    private function getCompanyEmailSafe($siteConfig)
+        {
+            // First try CompanyEmail from CustomSiteConfig extension
+            if (isset($siteConfig->CompanyEmail) && !empty($siteConfig->CompanyEmail)) {
+                $email = trim($siteConfig->CompanyEmail);
+                if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                    return $email;
+                }
+            }
+
+            // Then try default SiteConfig Email field
+            if (isset($siteConfig->Email) && !empty($siteConfig->Email)) {
+                $emailString = trim($siteConfig->Email);
+                if ($emailString !== '') {
+                    $emails = explode(',', $emailString);
+                    $firstEmail = trim($emails[0]);
+                    if (filter_var($firstEmail, FILTER_VALIDATE_EMAIL)) {
+                        return $firstEmail;
+                    }
+                }
+            }
+
+            // Final fallback - generate from domain
+            $domain = $_SERVER['HTTP_HOST'] ?? 'localhost';
+            return "noreply@{$domain}";
+        }
+
     public function login(HTTPRequest $request)
     {
         $validationResult = null;
@@ -64,31 +91,31 @@ class AuthPageController extends PageController
     public function register(HTTPRequest $request)
     {
         $validationResult = null;
-
+        $flashMessage = null;
+        
         if ($request->isPOST()) {
             $validationResult = $this->processRegister($request);
-
             if ($validationResult->isValid()) {
-                $this->getRequest()->getSession()->set('FlashMessage', [
+                // Jangan redirect, set flash message untuk ditampilkan
+                $flashMessage = ArrayData::create([
                     'Message' => 'Pendaftaran berhasil! Silakan cek email untuk verifikasi akun.',
-                    'Type' => 'primary'
+                    'Type' => 'success'
                 ]);
-                return $this->redirect(Director::absoluteBaseURL());
+            } else {
+                // Untuk error
+                $flashMessage = ArrayData::create([
+                    'Message' => 'Pendaftaran gagal',
+                    'Type' => 'danger'
+                ]);
             }
         }
-
-        if ($validationResult && !$validationResult->isValid()) {
-            $this->flashMessages = ArrayData::create([
-                'Message' => 'Pendaftaran gagal',
-                'Type' => 'danger'
-            ]);
-        }
-
+        
         $data = array_merge($this->getCommonData(), [
             'Title' => 'Register',
-            'ValidationResult' => $validationResult
+            'ValidationResult' => $validationResult,
+            'flashMessages' => $flashMessage // pass ke template
         ]);
-
+        
         return $this->customise($data)->renderWith(['RegisterPage', 'Page']);
     }
 
@@ -189,7 +216,8 @@ class AuthPageController extends PageController
                 $result->addError('Akun Anda belum diverifikasi. Silakan cek email.');
                 return $result;
             }
-
+            
+            
             if (!$member->inGroup('site-users')) {
                 Injector::inst()->get(IdentityStore::class)->logOut($request);
                 $result->addError('Invalid credentials.');
@@ -197,8 +225,10 @@ class AuthPageController extends PageController
                 $loginHandler->performLogin($member, $data, $request);
             }
         }
+        
 
         return $result;
+
     }
 
     private function processRegister(HTTPRequest $request)
@@ -337,36 +367,6 @@ class AuthPageController extends PageController
         }
 
         return $result;
-    }
-
-    /**
-     * Safely get company email from SiteConfig
-     */
-    private function getCompanyEmailSafe($siteConfig)
-    {
-        // First try CompanyEmail from CustomSiteConfig extension
-        if (isset($siteConfig->CompanyEmail) && !empty($siteConfig->CompanyEmail)) {
-            $email = trim($siteConfig->CompanyEmail);
-            if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                return $email;
-            }
-        }
-
-        // Then try default SiteConfig Email field
-        if (isset($siteConfig->Email) && !empty($siteConfig->Email)) {
-            $emailString = trim($siteConfig->Email);
-            if ($emailString !== '') {
-                $emails = explode(',', $emailString);
-                $firstEmail = trim($emails[0]);
-                if (filter_var($firstEmail, FILTER_VALIDATE_EMAIL)) {
-                    return $firstEmail;
-                }
-            }
-        }
-
-        // Final fallback - generate from domain
-        $domain = $_SERVER['HTTP_HOST'] ?? 'localhost';
-        return "noreply@{$domain}";
     }
 
     /**

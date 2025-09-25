@@ -1,8 +1,8 @@
-<div class="container" style="margin-top: 50px">
+<div class="container">
     <div class="row">
-        <div class="col-12">
+        <%-- <div class="col-12">
             <h1 class="text-center mb-3">All Product</h1>
-        </div>
+        </div> --%>
     </div>
 
 <% include Promocard     %>
@@ -28,18 +28,16 @@
                 
                 <div class="product-info text-start mt-5">
                     <h6 class="fw-bold text-dark text-start ms-3 product-name">$Name</h6>
-                    
-                    <div class="rating-section text-start ms-3">
-                        <div class="text-warning" style="font-size: 20px;">
-                            $StarRating
-                        </div>
-                        <small class="text-muted">
-                            <% if $ReviewCount > 0 %>
-                                ($AverageRating/5) - $ReviewCount review<% if $ReviewCount > 1 %>s<% end_if %>
-                            <% else %>
-                                No reviews yet
-                            <% end_if %>
-                        </small>
+
+                    <%-- rating di homepage dan productpage --%>
+                    <div class="mb-2 ms-3">
+                        <% if $Product.AverageRating %>
+                        <span class="text-warning">★ $Product.AverageRating</span>
+                        <span class="text-muted">($Product.Review.Count Ulasan)</span>
+                        <% else %>
+                        <span class="text-warning">★ 0</span>
+                        <span class="text-muted">(0 Ulasan)</span>
+                        <% end_if %>
                     </div>
                     
                     <div class="price-section text-start ms-3">

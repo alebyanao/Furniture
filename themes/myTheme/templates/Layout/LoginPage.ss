@@ -1,17 +1,18 @@
-<% if $flashMessages %>
-<div class="alert alert-$flashMessages.Type alert-dismissible fade show" role="alert">
-    $flashMessages.Message
-    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-</div>
-<% end_if %>
 
 <main class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
     <form action="$BaseHref/auth/login" method="POST" class="w-100 p-4 border rounded shadow-sm" style="max-width: 400px;">
         <h4 class="mb-3">Masuk</h4>
+
+        <% if $flashMessages %>
+        <div class="alert alert-$flashMessages.Type alert-dismissible fade show" role="alert">
+            $flashMessages.Message
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <% end_if %>
         
         <% if $ValidationResult && not $ValidationResult.IsValid %>
             <% loop $ValidationResult.getMessages %>
-                <div class="alert alert-danger">$Message</div>
+                <div>$Message</div>
             <% end_loop %>
         <% end_if %>
         
@@ -33,8 +34,8 @@
         <button type="submit" class="btn btn-primary w-100">Masuk</button>
         
         <div class="text-center mt-3">
-            <p class="mb-0">Tidak memiliki akun? <a href="$BaseHref/auth/register">Daftar di sini</a></p>
-            <p class="mb-0">Lupa sandi? <a href="$BaseHref/auth/forgot-password">Atur ulang sandi</a></p>
+            <p class="mb-0">Tidak memiliki akun? <a href="$BaseHref/auth/register">Daftar di sini</a></p>    
+        <p class="mb-0">Lupa sandi? <a href="$BaseHref/auth/forgot-password">Atur ulang sandi</a></p>
         </div>
     </form>
 </main>

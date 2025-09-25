@@ -218,16 +218,6 @@
     font-weight: bold;
 }
 
-.review-item:last-child {
-    border-bottom: none !important;
-    margin-bottom: 0 !important;
-    padding-bottom: 0 !important;
-}
-
-.reviews-section {
-    background-color: #f8f9fa;
-    padding: 2rem;
-}
 
 .modal-body form {
     margin: 0;
@@ -652,25 +642,6 @@
     background-color: #c4965c;
     border-color: #c4965c;
     color: white;
-}
-
-.review-item:last-child {
-    border-bottom: none !important;
-}
-
-@media (max-width: 768px) {
-    .container {
-        margin-top: 100px !important;
-    }
-    
-    .action-buttons .row > div {
-        margin-bottom: 10px;
-    }
-    
-    .action-buttons .btn-lg {
-        padding: 12px 20px;
-        font-size: 14px;
-    }
 }
 
 

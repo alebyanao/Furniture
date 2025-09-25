@@ -1,7 +1,5 @@
 <?php
 
-namespace App\Models;
-
 use SilverStripe\Assets\Image;
 use SilverStripe\Forms\TextField;
 use SilverStripe\Forms\TextareaField;
@@ -98,7 +96,7 @@ class HeroBanner extends DataObject
     }
 }
 
-// ===== FEATURE ITEM MODEL (IN SAME FILE) =====
+// ===== FEATURE ITEM MODEL =====
 class FeatureItem extends DataObject
 {
     private static $table_name = 'FeatureItem';

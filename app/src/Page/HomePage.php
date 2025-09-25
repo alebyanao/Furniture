@@ -1,13 +1,10 @@
 <?php
 
-namespace App\Page;
-
-use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\Forms\CheckboxField;
 use SilverStripe\Forms\HeaderField;
 use SilverStripe\Forms\LiteralField;
 
-class HomePage extends SiteTree
+class HomePage extends Page
 {
     private static $table_name = 'HomePage';
 
@@ -77,23 +74,6 @@ class HomePage extends SiteTree
             LiteralField::create('FeaturesInfo', $featuresInfo)
         );
 
-        // ===== OPTION: MANAGE FEATURES DIRECTLY FROM HOMEPAGE =====
-        // Uncomment this if you want to manage features directly from HomePage
-        /*
-        $fields->addFieldToTab('Root.FeaturesManagement',
-            HeaderField::create('FeaturesManagementHeader', 'Manage Features (Alternative)', 2)
-        );
-        
-        $fields->addFieldToTab('Root.FeaturesManagement',
-            GridField::create(
-                'AllFeatures',
-                'Feature Items',
-                FeatureItem::get(),
-                GridFieldConfig_RecordEditor::create()
-            )
-        );
-        */
-
         return $fields;
     }
 
@@ -125,4 +105,5 @@ class HomePage extends SiteTree
     {
         return $this->getFeaturesEnabled();
     }
+
 }
