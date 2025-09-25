@@ -96,13 +96,13 @@
                                 <div class="product-info text-start mt-5">
                                     <h6 class="fw-bold text-dark text-start ms-3 product-name">$Name</h6>
                                     
-                                    <div class="mb-2 ms-3">
-                                        <% if $Product.AverageRating %>
-                                        <span class="text-warning">★ $Product.AverageRating</span>
-                                        <span class="text-muted">($Product.Review.Count Ulasan)</span>
+                                    <div class="ms-3 mb-2">
+                                        <% if $AverageRating %>
+                                        <span class="text-warning small">★ $AverageRating</span>
+                                        <span class="text-muted small">($Review.Count Ulasan)</span>
                                         <% else %>
-                                        <span class="text-warning">★ 0</span>
-                                        <span class="text-muted">(0 Ulasan)</span>
+                                        <span class="text-warning small">★ 0</span>
+                                        <span class="text-muted small">(0 Ulasan)</span>
                                         <% end_if %>
                                     </div>
                                     
@@ -185,13 +185,13 @@
                                 <div class="product-info text-start mt-5">
                                     <h6 class="fw-bold text-dark text-start ms-3 product-name">$Name</h6>
                                     
-                                    <div class="mb-2 ms-3">
-                                        <% if $Product.AverageRating %>
-                                        <span class="text-warning">★ $Product.AverageRating</span>
-                                        <span class="text-muted">($Product.Review.Count Ulasan)</span>
+                                    <div class="ms-3 mb-2">
+                                        <% if $AverageRating %>
+                                        <span class="text-warning small">★ $AverageRating</span>
+                                        <span class="text-muted small">($Review.Count Ulasan)</span>
                                         <% else %>
-                                        <span class="text-warning">★ 0</span>
-                                        <span class="text-muted">(0 Ulasan)</span>
+                                        <span class="text-warning small">★ 0</span>
+                                        <span class="text-muted small">(0 Ulasan)</span>
                                         <% end_if %>
                                     </div>
                                     
@@ -269,13 +269,15 @@
                                 <div class="product-info text-start mt-5">
                                     <h6 class="fw-bold text-dark text-start ms-3 product-name">$Name</h6>
                                     
-                                    <p class="mb-1 text-warning">
-                            <% if $Product.AverageRating %>
-                                ★ $Product.AverageRating <span class="text-muted">($Product.Review.Count Ulasan)</span>
-                            <% else %>
-                                ★ 0 <span class="text-muted">(0 Ulasan)</span>
-                            <% end_if %>
-                        </p>
+                                    <div class="ms-3 mb-2">
+                                        <% if $AverageRating %>
+                                        <span class="text-warning small">★ $AverageRating</span>
+                                        <span class="text-muted small">($Review.Count Ulasan)</span>
+                                        <% else %>
+                                        <span class="text-warning small">★ 0</span>
+                                        <span class="text-muted small">(0 Ulasan)</span>
+                                        <% end_if %>
+                                    </div>
                                     
                                     <div class="price-section text-start ms-3">
                                         <% if $hasDiscount %>
@@ -348,13 +350,13 @@
                     <div class="product-info text-start mt-5">
                         <h6 class="fw-bold text-dark text-start ms-3 product-name">$Name</h6>
                         
-                        <div class="mb-2 ms-3">
-                            <% if $Product.AverageRating %>
-                            <span class="text-warning">★ $Product.AverageRating</span>
-                            <span class="text-muted">($Product.Review.Count Ulasan)</span>
+                        <div class="ms-3 mb-2">
+                            <% if $AverageRating %>
+                            <span class="text-warning small">★ $AverageRating</span>
+                            <span class="text-muted small">($Review.Count Ulasan)</span>
                             <% else %>
-                            <span class="text-warning">★ 0</span>
-                            <span class="text-muted">(0 Ulasan)</span>
+                            <span class="text-warning small">★ 0</span>
+                            <span class="text-muted small">(0 Ulasan)</span>
                             <% end_if %>
                         </div>
                         

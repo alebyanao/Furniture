@@ -44,11 +44,11 @@
             </div>
           </div>
 
-          <!-- Rating product detail -->
+          <!-- Rating product detail - FIXED -->
         <div class="mb-2">
-            <% if $Product.AverageRating %>
-            <span class="text-warning">★ $Product.AverageRating</span>
-            <span class="text-muted">($Product.Review.Count Ulasan)</span>
+            <% if $AverageRating %>
+            <span class="text-warning">★ $AverageRating</span>
+            <span class="text-muted">($Review.Count Ulasan)</span>
             <% else %>
             <span class="text-warning">★ 0</span>
             <span class="text-muted">(0 Ulasan)</span>
@@ -128,24 +128,15 @@
   </div>
 </div>
 
-<!-- User Message Display 
-<% if $getUserMessage %>
-<div class="container mt-3">
-  <div class="alert alert-info alert-dismissible fade show" role="alert">
-    $getUserMessage
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-  </div>
-</div>
-<% end_if %>-->
-
 <div class="container">
   <hr class="my-5">
           <!-- Reviews -->
     <div class="row">
         <div class="col-12">
             <h5 class="mb-3">Ulasan Pelanggan</h5>
-            <% if Review && Review.Count > 0 %>
-                <% loop Review %>
+            <% with $Product %>
+            <% if $Review && $Review.Count > 0 %>
+                <% loop $Review %>
                 <div class="mb-4 border rounded p-3">
                     <strong><% if $ShowName == true %>$Member.FirstName $Member.Surname<% else %>Anonim<% end_if %></strong> 
                     <span class="text-warning">★ $Rating</span>
@@ -162,6 +153,7 @@
                     <h5 class="mb-3">Belum ada ulasan untuk produk ini</h5>
                 </div>
             <% end_if %>
+            <% end_with %>
         </div>
     </div>
         <% if not $Product %>

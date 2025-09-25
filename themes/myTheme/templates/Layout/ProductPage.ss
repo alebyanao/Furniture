@@ -30,16 +30,16 @@
                     <h6 class="fw-bold text-dark text-start ms-3 product-name">$Name</h6>
 
                     <%-- rating di homepage dan productpage --%>
-                    <div class="mb-2 ms-3">
-                        <% if $Product.AverageRating %>
-                        <span class="text-warning">★ $Product.AverageRating</span>
-                        <span class="text-muted">($Product.Review.Count Ulasan)</span>
+                   <div class="ms-3 mb-2">
+                        <% if $AverageRating %>
+                        <span class="text-warning small">★ $AverageRating</span>
+                        <span class="text-muted small">($Review.Count Ulasan)</span>
                         <% else %>
-                        <span class="text-warning">★ 0</span>
-                        <span class="text-muted">(0 Ulasan)</span>
+                        <span class="text-warning small">★ 0</span>
+                        <span class="text-muted small">(0 Ulasan)</span>
                         <% end_if %>
                     </div>
-                    
+    
                     <div class="price-section text-start ms-3">
                         <% if $hasDiscount %>
                         <p class="text-muted mb-0 small text-decoration-line-through">$FormattedPrice</p>
