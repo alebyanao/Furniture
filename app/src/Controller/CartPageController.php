@@ -2,6 +2,7 @@
 
 use SilverStripe\Control\Director;
 use SilverStripe\Control\HTTPRequest;
+use SilverStripe\Control\HTTPResponse;
 
 class CartPageController extends PageController
 {
@@ -15,7 +16,7 @@ class CartPageController extends PageController
     private static $url_segment = 'cart';
     private static $url_handlers = [
         'product/$ID' => 'product',
-        'add/$ID/$Quantity' => 'add', // moddifikasi untuk support quantity
+        'add/$ID/$Quantity' => 'add',
         'remove/$ID' => 'remove',
         'update-quantity' => 'updateQuantity',
         '' => 'index'
@@ -46,7 +47,6 @@ class CartPageController extends PageController
 
     /**
      * Menambahkan produk ke cart.
-     * Support untuk quantity dari URL parameter atau default 1.
      */
     public function add(HTTPRequest $request)
     {
@@ -55,9 +55,8 @@ class CartPageController extends PageController
         }
 
         $productID = $request->param('ID');
-        $quantity = (int) $request->param('Quantity') ?: 1; // ambil quantity dari URL atau default 1
+        $quantity = (int) $request->param('Quantity') ?: 1;
         
-        // Jika quantity dari GET parameter (fallback)
         if ($request->getVar('quantity')) {
             $quantity = (int) $request->getVar('quantity');
         }
@@ -68,7 +67,6 @@ class CartPageController extends PageController
             return $this->httpError(404);
         }
 
-        // Validasi quantity
         if ($quantity <= 0) {
             $quantity = 1;
         }
@@ -82,7 +80,6 @@ class CartPageController extends PageController
         if ($existingCartItem) {
             $newQuantity = $existingCartItem->Quantity + $quantity;
             
-            // Cek stok
             if ($newQuantity > $product->Stock) {
                 $this->getRequest()->getSession()->set('UserMessage', 
                     'Tidak bisa menambah ' . $quantity . ' item. Maksimal bisa ditambah: ' . ($product->Stock - $existingCartItem->Quantity));
@@ -92,7 +89,6 @@ class CartPageController extends PageController
             $existingCartItem->Quantity = $newQuantity;
             $existingCartItem->write();
         } else {
-            // Cek stok untuk item baru
             if ($quantity > $product->Stock) {
                 $this->getRequest()->getSession()->set('UserMessage', 
                     'Quantity melebihi stok. Stok tersedia: ' . $product->Stock);
@@ -137,12 +133,15 @@ class CartPageController extends PageController
     }
 
     /**
-     * Mengupdate jumlah item di cart.
-     * Memastikan jumlah tidak melebihi stok produk.
+     * Mengupdate jumlah item di cart dengan AJAX response.
      */
     public function updateQuantity(HTTPRequest $request)
     {
         if (!$this->isLoggedIn()) {
+            if ($request->getHeader('Accept') == 'application/json') {
+                return HTTPResponse::create('{"error": "Unauthorized"}', 401)
+                    ->addHeader('Content-Type', 'application/json');
+            }
             return $this->redirect(Director::absoluteBaseURL() . '/auth/login');
         }
 
@@ -156,8 +155,60 @@ class CartPageController extends PageController
                 'MemberID' => $user->ID
             ])->first();
 
+            // For AJAX requests, return JSON response
+            if ($request->getHeader('Accept') == 'application/json' || 
+                $request->getHeader('Content-Type') == 'application/json' ||
+                $request->getVar('ajax') == '1') {
+                
+                if ($cartItem) {
+                    if ($newQuantity > 0) {
+                        // Check if quantity doesn't exceed stock
+                        if ($newQuantity <= $cartItem->Product()->Stock) {
+                            $cartItem->Quantity = $newQuantity;
+                            $cartItem->write();
+                            
+                            $response = [
+                                'success' => true,
+                                'message' => 'Quantity updated successfully',
+                                'new_quantity' => $newQuantity,
+                                'new_subtotal' => $cartItem->getSubtotal(),
+                                'formatted_subtotal' => $cartItem->getFormattedSubtotal(),
+                                'total_items' => $this->getTotalItems(),
+                                'total_price' => $this->getTotalPrice(),
+                                'formatted_total_price' => $this->getFormattedTotalPrice()
+                            ];
+                        } else {
+                            $response = [
+                                'success' => false,
+                                'error' => 'Quantity melebihi stok yang tersedia! Maksimal: ' . $cartItem->Product()->Stock,
+                                'max_stock' => $cartItem->Product()->Stock
+                            ];
+                        }
+                    } else {
+                        // Remove item if quantity is 0 or negative
+                        $cartItem->delete();
+                        $response = [
+                            'success' => true,
+                            'message' => 'Item removed from cart',
+                            'item_removed' => true,
+                            'total_items' => $this->getTotalItems(),
+                            'total_price' => $this->getTotalPrice(),
+                            'formatted_total_price' => $this->getFormattedTotalPrice()
+                        ];
+                    }
+                } else {
+                    $response = [
+                        'success' => false,
+                        'error' => 'Cart item not found'
+                    ];
+                }
+
+                return HTTPResponse::create(json_encode($response), 200)
+                    ->addHeader('Content-Type', 'application/json');
+            }
+
+            // For regular form submissions (fallback)
             if ($cartItem && $newQuantity > 0) {
-                // Cek apakah quantity tidak melebihi stok
                 if ($newQuantity <= $cartItem->Product()->Stock) {
                     $cartItem->Quantity = $newQuantity;
                     $cartItem->write();
@@ -165,8 +216,7 @@ class CartPageController extends PageController
                     $this->getRequest()->getSession()->set('UserMessage', 
                         'Quantity melebihi stok. Maksimal: ' . $cartItem->Product()->Stock);
                 }
-            } else if ($newQuantity <= 0) {
-                // Hapus item jika quantity 0
+            } else if ($newQuantity <= 0 && $cartItem) {
                 $cartItem->delete();
             }
         }
@@ -222,7 +272,7 @@ class CartPageController extends PageController
         return 'Rp ' . number_format($this->getTotalPrice(), 0, '.', '.');
     }
 
-     public function product(HTTPRequest $request)
+    public function product(HTTPRequest $request)
     {
         $id = $request->param('ID');
         $product = Product::get()->byID($id);

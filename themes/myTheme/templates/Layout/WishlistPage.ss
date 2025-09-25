@@ -65,14 +65,29 @@
 
                 <!-- Actions -->
                 <div class="col-12 col-md-3 col-lg-3">
-                    <div class="card-body text-center text-md-end">
-                        <div class="d-flex flex-column gap-2">
-                            <a onclick="window.location.href='$Top.Link(product)/$Product.ID'" class="btn btn-sm btn-outline-secondary rounded-pill" style="cursor: pointer;">Lihat Detail</a>
-                            <a href="$BaseHref/cart/add/$Product.ID" class="btn btn-sm text-white fw-bold rounded-pill" style="background-color: #c4965c;">Keranjang</a> 
-                            <a href="$BaseHref/wishlist/remove/$ID" class="btn btn-sm btn-outline-danger rounded-pill" onclick="return confirm('Apakah Anda yakin ingin menghapus item ini dari Wishlist Anda?')">Hapus dari Wishlist</a>
-                        </div>
-                    </div>
-                </div>
+  <div class="card-body text-center text-md-end">
+    <div class="d-flex flex-row justify-content-md-end justify-content-center">
+
+      <!-- Keranjang -->
+
+       <a href="$BaseHref/cart/add/$Product.ID" 
+                class="btn cart-btn px-3 px-md-4 rounded-pill" 
+                style="font-size: 14px;">
+                <i class="bi bi-cart"></i>
+              </a>
+
+        <a href="$BaseHref/wishlist/remove/$ID" 
+            class="btn btn-sm"
+            onclick="return confirm('Yakin ingin menghapus item ini dari wishlist?')">
+            <svg width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+                <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+            </svg>
+        </a>
+      
+    </div>
+  </div>
+</div>
             </div>
         </div>
         <% end_loop %>
@@ -108,4 +123,20 @@ a[onclick] {
 a[onclick]:hover {
     opacity: 0.8;
 }
+
+
+.cart-btn {
+  background-color: transparent;
+  color: #c4965c; /* icon default pakai warna emas */
+  border: 1px solid #c4965c; /* biar ada outline */
+  transition: all 0.3s ease;
+}
+
+.cart-btn:hover,
+.cart-btn:focus,
+.cart-btn:active {
+  background-color: #c4965c;
+  color: #fff; /* icon jadi putih saat hover/click */
+}
+
 </style>

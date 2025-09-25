@@ -20,7 +20,9 @@ class CheckoutPageController extends PageController
         "getCities",
         "getDistricts",
         "checkOngkir",
-        "calculateTotal"
+        "calculateTotal",
+        "updateQuantity", // Add this for checkout quantity updates
+        "removeItem"      // Add this for removing items from checkout
     ];
 
     private static $url_segment = "checkout";
@@ -30,6 +32,8 @@ class CheckoutPageController extends PageController
         'process-order' => 'processOrder',
         'add-address' => 'addAddress',
         'update-address' => 'updateAddress',
+        'update-quantity' => 'updateQuantity', // Add this route
+        'remove-item/$ID' => 'removeItem',     // Add this route
         'api/provinces' => 'getProvinces',
         'api/cities/$ID' => 'getCities',
         'api/districts/$ID' => 'getDistricts',
@@ -67,6 +71,110 @@ class CheckoutPageController extends PageController
         ]);
 
         return $this->customise($data)->renderWith(['CheckoutPage', 'Page']);
+    }
+
+    /**
+     * Update quantity of cart item from checkout page
+     */
+    public function updateQuantity(HTTPRequest $request)
+    {
+        if (!$this->isLoggedIn()) {
+            return HTTPResponse::create('{"error": "Unauthorized"}', 401)
+                ->addHeader('Content-Type', 'application/json');
+        }
+
+        if ($request->isPOST()) {
+            $cartItemID = $request->postVar('cartItemID');
+            $newQuantity = (int) $request->postVar('quantity');
+            $user = $this->getCurrentUser();
+
+            $cartItem = CartItem::get()->filter([
+                'ID' => $cartItemID,
+                'MemberID' => $user->ID
+            ])->first();
+
+            if ($cartItem) {
+                if ($newQuantity > 0) {
+                    // Check if quantity doesn't exceed stock
+                    if ($newQuantity <= $cartItem->Product()->Stock) {
+                        $cartItem->Quantity = $newQuantity;
+                        $cartItem->write();
+                        
+                        $response = [
+                            'success' => true,
+                            'message' => 'Quantity updated successfully',
+                            'new_quantity' => $newQuantity,
+                            'new_subtotal' => $cartItem->getSubtotal(),
+                            'formatted_subtotal' => $cartItem->getFormattedSubtotal(),
+                            'total_items' => $this->getTotalItems(),
+                            'total_price' => $this->getTotalPrice(),
+                            'formatted_total_price' => $this->getFormattedTotalPrice(),
+                            'total_weight' => $this->getTotalWeight()
+                        ];
+                    } else {
+                        $response = [
+                            'success' => false,
+                            'error' => 'Quantity exceeds available stock. Maximum: ' . $cartItem->Product()->Stock,
+                            'max_stock' => $cartItem->Product()->Stock
+                        ];
+                    }
+                } else {
+                    // Remove item if quantity is 0 or negative
+                    $cartItem->delete();
+                    $response = [
+                        'success' => true,
+                        'message' => 'Item removed from cart',
+                        'item_removed' => true,
+                        'total_items' => $this->getTotalItems(),
+                        'total_price' => $this->getTotalPrice(),
+                        'formatted_total_price' => $this->getFormattedTotalPrice(),
+                        'total_weight' => $this->getTotalWeight()
+                    ];
+                }
+            } else {
+                $response = [
+                    'success' => false,
+                    'error' => 'Cart item not found'
+                ];
+            }
+
+            return HTTPResponse::create(json_encode($response), 200)
+                ->addHeader('Content-Type', 'application/json');
+        }
+
+        return HTTPResponse::create('{"error": "Method not allowed"}', 405)
+            ->addHeader('Content-Type', 'application/json');
+    }
+
+    /**
+     * Remove item from cart during checkout
+     */
+    public function removeItem(HTTPRequest $request)
+    {
+        if (!$this->isLoggedIn()) {
+            return $this->redirect(Director::absoluteBaseURL() . '/auth/login');
+        }
+
+        $cartItemID = $request->param('ID');
+        $user = $this->getCurrentUser();
+
+        $cartItem = CartItem::get()->filter([
+            'ID' => $cartItemID,
+            'MemberID' => $user->ID
+        ])->first();
+
+        if ($cartItem) {
+            $cartItem->delete();
+            $this->getRequest()->getSession()->set('CheckoutMessage', 'Item removed from cart');
+        }
+
+        // Check if cart is empty, redirect to cart page
+        $remainingItems = CartItem::get()->filter('MemberID', $user->ID);
+        if ($remainingItems->count() == 0) {
+            return $this->redirect(Director::absoluteBaseURL() . '/cart');
+        }
+
+        return $this->redirectBack();
     }
 
     /**
@@ -273,9 +381,6 @@ class CheckoutPageController extends PageController
                 $this->getRequest()->getSession()->set('CheckoutError', 'Stock produk tidak mencukupi');
                 return $this->redirectBack();
             }
-            
-            // Debug::show('Testing');
-            // die();
 
             $shippingAddress = ShippingAddress::get()->filter('MemberID', $user->ID)->first();
             if (!$shippingAddress) {

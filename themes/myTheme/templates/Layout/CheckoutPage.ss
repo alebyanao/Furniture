@@ -7,6 +7,13 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
     <% end_if %>
+
+    <% if $Session.CheckoutMessage %>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        $Session.CheckoutMessage
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <% end_if %>
     
     <% if CartItems && CartItems.Count > 0 %>
     <form method="post" action="$BaseHref/checkout/process-order" target="_blank" id="checkoutForm">
@@ -27,25 +34,79 @@
             </div>
         </div>
 
-        <!-- Produk di Keranjang -->
+        <!-- Produk di Keranjang dengan Quantity Controls -->
         <div class="card mb-3">
-            <div class="card-header fw-bold">Produk Dipesan</div>
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span class="fw-bold">Produk Dipesan</span>
+                <small class="text-muted">Total: <span id="checkout-total-items">$TotalItems</span> item(s)</small>
+            </div>
             <div class="card-body">
                 <% loop CartItems %>
-                <div class="d-flex align-items-center border-bottom pb-3 mb-3">
-                    <a href="$BaseHref/list-product/view/$Product.ID" class="text-decoration-none text-black">
-                    <% if $Product.Image %>
-                        <img src="$Product.Image.URL" class="me-3" alt="$Product.Name" width="80" />
-                    <% else %>
-                        <img src="https://picsum.photos/80?random=$Product.ID" class="me-3" alt="$Product.Name" width="80" />
-                    <% end_if %>
-                    </a>
-                    <div class="flex-grow-1">
-                        <h6 class="mb-1">$Product.Name</h6>
-                        <small class="text-muted">Berat: $Product.Weight gr</small>
-                        <p class="mb-1">$Product.DisplayPrice × $Quantity</p>
+                <div class="cart-item-checkout" data-item-id="$ID">
+                    <div class="row align-items-center border-bottom pb-3 mb-3">
+                        <!-- Product Image & Details -->
+                        <div class="col-md-5">
+                            <div class="d-flex align-items-center">
+                                <a href="$BaseHref/list-product/view/$Product.ID" class="text-decoration-none text-black me-3">
+                                <% if $Product.Image %>
+                                    <img src="$Product.Image.FitMax(80,80).URL" class="rounded" alt="$Product.Name" width="80" />
+                                <% else %>
+                                    <img src="https://picsum.photos/80?random=$Product.ID" class="rounded" alt="$Product.Name" width="80" />
+                                <% end_if %>
+                                </a>
+                                <div>
+                                    <h6 class="mb-1">$Product.Name</h6>
+                                    <small class="text-muted">Berat: $Product.Weight gr | Stok: $Product.Stock</small>
+                                    <div class="text-primary fw-bold">$Product.DisplayPrice</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quantity Controls -->
+                        <div class="col-6 col-md-2 text-center">
+                            <div class="p-2">
+                                <small class="d-md-none text-muted">Qty:</small>
+                                <div class="input-group rounded-pill border overflow-hidden flex-shrink-0" style="width: 120px; max-width: 120px;">
+                                    <button class="btn btn-outline-secondary border-0 px-2" type="button" 
+                                            onclick="changeCheckoutQuantity($ID, -1, $Product.Stock)">-</button>
+                                    
+                                    <input type="number" 
+                                        class="form-control text-center border-0 px-1 quantity-input-checkout" 
+                                        value="$Quantity" 
+                                        min="1" 
+                                        max="$Product.Stock" 
+                                        data-item-id="$ID"
+                                        data-original-value="$Quantity"
+                                        onchange="updateCheckoutQuantity(this, $Product.Stock)"
+                                        style="font-size: 14px;">
+                                        
+                                    <button class="btn btn-outline-secondary border-0 px-2" type="button" 
+                                            onclick="changeCheckoutQuantity($ID, 1, $Product.Stock)">+</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Subtotal -->
+                        <div class="col-md-3">
+                            <div class="text-end">
+                            <h4 class="fw-bold item-subtotal" style="color: #c4965c;">$FormattedSubtotal</h4>
+                            </div>
+                        </div>
+
+                        <!-- Remove Button -->
+                        <div class="col-md-1">
+                            <div class="text-end">
+                                <a href="$BaseHref/checkout/remove-item/$ID" 
+                                   class="btn btn-sm"
+                                   onclick="return confirm('Yakin ingin menghapus item ini dari checkout?')">
+                                    <svg width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+                                        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+                                        <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+                                    </svg>
+                                </a>
+                            </div>
+                        </div>
                     </div>
-                    <div class="fw-bold">$FormattedSubtotal</div>
                 </div>
                 <% end_loop %>
             </div>
@@ -122,7 +183,7 @@
             <div class="card-header fw-bold">Ringkasan Pembayaran</div>
             <div class="card-body">
                 <div class="d-flex justify-content-between mb-2">
-                    <span>Subtotal ($TotalItems items)</span>
+                    <span>Subtotal (<span id="checkout-summary-items">$TotalItems</span> items)</span>
                     <span id="subtotalAmount">$FormattedTotalPrice</span>
                 </div>
                 <div class="d-flex justify-content-between mb-2">
@@ -172,6 +233,115 @@
 $(document).ready(function() {
     let selectedShippingCost = 0;
     let selectedPaymentFee = 0;
+
+    // Checkout quantity management functions
+    window.changeCheckoutQuantity = function(itemId, delta, maxStock) {
+        const input = document.querySelector(`input[data-item-id="${itemId}"]`);
+        let value = parseInt(input.value) || 1;
+        
+        value += delta;
+        if (value < 1) value = 1;
+        if (value > maxStock) {
+            alert('Quantity melebihi stok yang tersedia! Maksimal: ' + maxStock);
+            value = maxStock;
+        }
+
+        input.value = value;
+        updateCheckoutQuantity(input, maxStock);
+    };
+
+    window.updateCheckoutQuantity = function(input, maxStock) {
+        let value = parseInt(input.value) || 1;
+        const originalValue = parseInt(input.getAttribute('data-original-value')) || 1;
+        
+        // Validate quantity
+        if (value < 1) {
+            value = 1;
+            input.value = value;
+        }
+        if (value > maxStock) {
+            alert('Quantity melebihi stok yang tersedia! Maksimal: ' + maxStock);
+            value = maxStock;
+            input.value = value;
+        }
+
+        // Only update if value changed
+        if (value !== originalValue) {
+            const itemId = input.getAttribute('data-item-id');
+            updateQuantityOnServer(itemId, value, input);
+        }
+    };
+
+    function updateQuantityOnServer(itemId, quantity, inputElement) {
+        // Disable input while updating
+        inputElement.disabled = true;
+        
+        $.ajax({
+            url: '$BaseHref/checkout/update-quantity',
+            method: 'POST',
+            data: {
+                cartItemID: itemId,
+                quantity: quantity
+            },
+            success: function(response) {
+                if (response.success) {
+                    // Update original value
+                    inputElement.setAttribute('data-original-value', quantity);
+                    
+                    if (response.item_removed) {
+                        // Remove item from DOM
+                        $(inputElement).closest('.cart-item-checkout').fadeOut(300, function() {
+                            $(this).remove();
+                            updateCheckoutTotals(response);
+                        });
+                    } else {
+                        // Update item subtotal
+                        const itemContainer = $(inputElement).closest('.cart-item-checkout');
+                        itemContainer.find('.item-subtotal').text(response.formatted_subtotal);
+                        updateCheckoutTotals(response);
+                    }
+                } else {
+                    alert(response.error);
+                    // Revert to original value
+                    inputElement.value = inputElement.getAttribute('data-original-value');
+                }
+            },
+            error: function() {
+                alert('Gagal mengupdate quantity. Silakan coba lagi.');
+                // Revert to original value
+                inputElement.value = inputElement.getAttribute('data-original-value');
+            },
+            complete: function() {
+                inputElement.disabled = false;
+            }
+        });
+    }
+
+    function updateCheckoutTotals(response) {
+        // Update total items display
+        $('#checkout-total-items').text(response.total_items);
+        $('#checkout-summary-items').text(response.total_items);
+        
+        // Update subtotal
+        $('#subtotalAmount').text(response.formatted_total_price);
+        
+        // Update total weight for shipping calculation
+        $('#totalWeight').val(response.total_weight);
+        
+        // Recalculate total with shipping and payment fees
+        updateTotal();
+        
+        // Reset shipping selection if weight changed significantly
+        if (selectedShippingCost > 0) {
+            $('#ongkirResults').addClass('d-none');
+            selectedShippingCost = 0;
+            $('#hiddenShippingCost').val('0');
+            $('#hiddenCourierService').val('');
+            $('#shippingCost').text('Rp 0');
+            updateTotal();
+            checkFormValidity();
+        }
+    }
 
     // Event handler untuk tombol cek ongkir
     $('#checkOngkirBtn').click(function() {
@@ -285,6 +455,7 @@ $(document).ready(function() {
                 $('#shippingCost').text(response.formatted_shipping_cost);
                 $('#paymentFee').text(response.formatted_payment_fee);
                 $('#totalCost').text(response.formatted_total_cost);
+                $('#subtotalAmount').text(response.formatted_subtotal);
             },
             error: function() {
                 console.error('Gagal menghitung total');

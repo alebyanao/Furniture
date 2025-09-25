@@ -43,7 +43,7 @@
                                 <div class="d-flex align-items-center justify-content-center h-100">
                                      <a onclick="window.location.href='$Top.Link(product)/$Product.ID'" class="d-block" style="text-decoration: none; cursor: pointer;">
                                         <% if $Product.Image %>
-                                        <img src="$Product.Image.FitMax(100,100).URL" alt="$Product.Name" class="img-fluid" style="max-height: 140px; max-width: 100%; object-fit: contain; transition: transform 0.2s ease;">
+                                        <img src="$Product.Image.FitMax(100,100).URL" alt="$Product.Name" class="img-fluid" style="max-height: 160px; max-width: 100%; object-fit: contain; transition: transform 0.2s ease;">
                                         <% else %>
                                         <!-- No Image Placeholder -->
                                         <svg width="80" height="50" viewBox="0 0 80 50" fill="none">
@@ -89,28 +89,27 @@
                         </div>
                     </div>
 
-                    <!-- Quantity Form -->
+                    <!-- Quantity Form with AJAX -->
                     <div class="col-6 col-md-2 text-center">
                         <div class="p-2">
                             <small class="d-md-none text-muted">Quantity:</small>
-                            <form method="post" action="$BaseHref/cart/update-quantity" class="quantity-form" data-item-id="$ID">
-                                <input type="hidden" name="cartItemID" value="$ID">
-                                <div class="input-group rounded-pill border overflow-hidden flex-shrink-0" style="width: 120px; max-width: 120px;">
-                                    <button class="btn btn-outline-secondary border-0 px-2" type="button" onclick="changeQuantity(this, -1)">-</button>
-                                    
-                                    <input type="number" 
-                                           name="quantity"
-                                           class="form-control text-center border-0 px-1 quantity-input" 
-                                           value="$Quantity" 
-                                           min="1" 
-                                           max="$Product.Stock" 
-                                           data-original-value="$Quantity"
-                                           onchange="scheduleSubmit(this)"
-                                           style="font-size: 14px;">
-                                           
-                                    <button class="btn btn-outline-secondary border-0 px-2" type="button" onclick="changeQuantity(this, 1)">+</button>
-                                </div>
-                            </form>
+                            <div class="input-group rounded-pill border overflow-hidden flex-shrink-0" style="width: 120px; max-width: 120px;">
+                                <button class="btn btn-outline-secondary border-0 px-2" type="button" 
+                                        onclick="changeCartQuantity($ID, -1, $Product.Stock)">-</button>
+                                
+                                <input type="number" 
+                                       class="form-control text-center border-0 px-1 quantity-input-cart" 
+                                       value="$Quantity" 
+                                       min="1" 
+                                       max="$Product.Stock" 
+                                       data-item-id="$ID"
+                                       data-original-value="$Quantity"
+                                       onchange="updateCartQuantity(this, $Product.Stock)"
+                                       style="font-size: 14px;">
+                                       
+                                <button class="btn btn-outline-secondary border-0 px-2" type="button" 
+                                        onclick="changeCartQuantity($ID, 1, $Product.Stock)">+</button>
+                            </div>
                         </div>
                     </div>
 
@@ -126,7 +125,7 @@
                     <div class="col-6 col-md-1 text-center">
                         <div class="p-2">
                             <a href="$BaseHref/cart/remove/$ID" 
-                               class="btn btn-sm" 
+                               class="btn btn-sm remove-item-btn" 
                                style="width: 40px; height: 40px;"
                                onclick="return confirm('Yakin ingin menghapus item ini?')">
                                 <svg width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
@@ -195,149 +194,202 @@ a[onclick]:hover {
 .cart-item:hover img {
     transform: scale(1.05);
 }
+
+/* Loading state for quantity inputs */
+.quantity-input-cart:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Button loading state */
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
 </style>
 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-// Format rupiah function
-function formatRupiah(number) {
-    return 'Rp ' + new Intl.NumberFormat('id-ID').format(number);
-}
-
-// Update item total price (real-time preview)
-function updateItemTotal(input) {
-    const quantity = parseInt(input.value) || 1;
-    const unitPrice = parseFloat(input.closest('.cart-item').querySelector('.unit-price').getAttribute('data-unit-price')) || 0;
-    const itemTotal = unitPrice * quantity;
-    
-    // Update item total display
-    input.closest('.cart-item').querySelector('.item-total').textContent = formatRupiah(itemTotal);
-    
-    // Update grand totals
-    updateGrandTotal();
-}
-
-// Update grand total (real-time preview)
-function updateGrandTotal() {
-    let totalItems = 0;
-    let totalPrice = 0;
-    
-    document.querySelectorAll('.quantity-input').forEach(input => {
-        const quantity = parseInt(input.value) || 0;
-        const unitPrice = parseFloat(input.closest('.cart-item').querySelector('.unit-price').getAttribute('data-unit-price')) || 0;
+$(document).ready(function() {
+    // Cart quantity management functions (same as checkout)
+    window.changeCartQuantity = function(itemId, delta, maxStock) {
+        const input = document.querySelector(`input[data-item-id="${itemId}"]`);
+        let value = parseInt(input.value) || 1;
         
-        totalItems += quantity;
-        totalPrice += (unitPrice * quantity);
-    });
-    
-    // Update displays
-    document.getElementById('total-items').textContent = totalItems + ' Item';
-    document.getElementById('total-price').textContent = formatRupiah(totalPrice);
-}
+        value += delta;
+        if (value < 1) value = 1;
+        if (value > maxStock) {
+            alert('Quantity melebihi stok yang tersedia! Maksimal: ' + maxStock);
+            value = maxStock;
+        }
 
-// Change quantity with +/- buttons
-function changeQuantity(button, delta) {
-    const input = button.parentElement.querySelector('.quantity-input');
-    let value = parseInt(input.value) || 1;
-    const min = parseInt(input.getAttribute('min')) || 1;
-    const max = parseInt(input.getAttribute('max')) || 99;
-
-    value += delta;
-    if (value < min) value = min;
-    if (value > max) {
-        alert('Quantity melebihi stok yang tersedia! Maksimal: ' + max);
-        value = max;
-    }
-
-    input.value = value;
-    updateItemTotal(input); // Update preview
-    scheduleSubmit(input);  // Schedule form submit
-}
-
-// Schedule form submission with debounce
-function scheduleSubmit(input) {
-    // Validate quantity
-    let value = parseInt(input.value) || 1;
-    const min = parseInt(input.getAttribute('min')) || 1;
-    const max = parseInt(input.getAttribute('max')) || 99;
-    const originalValue = parseInt(input.getAttribute('data-original-value')) || 1;
-
-    if (value < min) {
-        value = min;
         input.value = value;
-    }
-    if (value > max) {
-        alert('Quantity melebihi stok yang tersedia! Maksimal: ' + max);
-        value = max;
-        input.value = value;
-    }
+        updateCartQuantity(input, maxStock);
+    };
 
-    // Update preview
-    updateItemTotal(input);
-
-    // Only submit if value changed
-    if (value !== originalValue) {
-        // Clear existing timeout
-        clearTimeout(input.submitTimeout);
+    window.updateCartQuantity = function(input, maxStock) {
+        let value = parseInt(input.value) || 1;
+        const originalValue = parseInt(input.getAttribute('data-original-value')) || 1;
         
-        // Schedule submit after 1 second (faster)
-        input.submitTimeout = setTimeout(() => {
-            submitFormAjax(input);
-        }, 1000);
-    }
-}
+        // Validate quantity
+        if (value < 1) {
+            value = 1;
+            input.value = value;
+        }
+        if (value > maxStock) {
+            alert('Quantity melebihi stok yang tersedia! Maksimal: ' + maxStock);
+            value = maxStock;
+            input.value = value;
+        }
 
-// Submit the form via AJAX (no page reload)
-function submitFormAjax(input) {
-    const cartItemID = input.closest('form').querySelector('input[name="cartItemID"]').value;
-    const quantity = input.value;
-    
-    // Update original value to prevent duplicate submits
-    input.setAttribute('data-original-value', quantity);
-    
-    // Create simple POST request
-    const formData = new FormData();
-    formData.append('cartItemID', cartItemID);
-    formData.append('quantity', quantity);
-    
-    // Send request in background
-    fetch('/cart/update-quantity', {
-        method: 'POST',
-        body: formData
-    }).then(response => {
-        // Success - quantity saved silently
-        console.log('Quantity updated');
-    }).catch(error => {
-        // Error - revert to original value
-        console.error('Update failed:', error);
-        input.value = input.getAttribute('data-original-value');
-        updateItemTotal(input);
-    });
-}
+        // Only update if value changed
+        if (value !== originalValue) {
+            const itemId = input.getAttribute('data-item-id');
+            updateQuantityOnServer(itemId, value, input);
+        }
+    };
 
-// Initialize on page load
-document.addEventListener('DOMContentLoaded', function() {
-    // Set up initial state
-    updateGrandTotal();
+    function updateQuantityOnServer(itemId, quantity, inputElement) {
+        // Disable input and buttons while updating
+        inputElement.disabled = true;
+        const cartItem = $(inputElement).closest('.cart-item');
+        cartItem.find('button').prop('disabled', true);
         
-    // Add manual input change listeners
-    document.querySelectorAll('.quantity-input').forEach(input => {
-        // On focus out
-        input.addEventListener('blur', function() {
-            scheduleSubmit(this);
-        });
-        
-        // On Enter key
-        input.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                scheduleSubmit(this);
+        $.ajax({
+            url: '$BaseHref/cart/update-quantity',
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json'
+            },
+            data: {
+                cartItemID: itemId,
+                quantity: quantity,
+                ajax: '1'
+            },
+            success: function(response) {
+                if (response.success) {
+                    // Update original value
+                    inputElement.setAttribute('data-original-value', quantity);
+                    
+                    if (response.item_removed) {
+                        // Remove item from DOM with animation
+                        cartItem.fadeOut(300, function() {
+                            $(this).remove();
+                            updateCartTotals(response);
+                            checkIfCartEmpty();
+                        });
+                    } else {
+                        // Update item subtotal
+                        cartItem.find('.item-total').text(response.formatted_subtotal);
+                        updateCartTotals(response);
+                    }
+                } else {
+                    alert(response.error);
+                    // Revert to original value
+                    inputElement.value = inputElement.getAttribute('data-original-value');
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('AJAX Error:', error);
+                alert('Gagal mengupdate quantity. Silakan coba lagi.');
+                // Revert to original value
+                inputElement.value = inputElement.getAttribute('data-original-value');
+            },
+            complete: function() {
+                // Re-enable input and buttons
+                inputElement.disabled = false;
+                cartItem.find('button').prop('disabled', false);
             }
         });
+    }
+
+    function updateCartTotals(response) {
+        // Update total items display
+        $('#total-items').text(response.total_items + ' Item');
         
-        // On input change (for real-time preview)
-        input.addEventListener('input', function() {
-            updateItemTotal(this);
+        // Update total price
+        $('#total-price').text(response.formatted_total_price);
+    }
+
+    function checkIfCartEmpty() {
+        // Check if no cart items remain
+        if ($('.cart-item').length === 0) {
+            // Reload page to show empty cart message
+            setTimeout(function() {
+                window.location.reload();
+            }, 500);
+        }
+    }
+
+    // Initialize real-time preview updates for manual input changes
+    $('.quantity-input-cart').on('input', function() {
+        updateItemTotalPreview(this);
+    });
+
+    // Update item total preview (visual only, no server update)
+    function updateItemTotalPreview(input) {
+        const quantity = parseInt(input.value) || 1;
+        const unitPrice = parseFloat($(input).closest('.cart-item').find('.unit-price').attr('data-unit-price')) || 0;
+        const itemTotal = unitPrice * quantity;
+        
+        // Update item total display
+        $(input).closest('.cart-item').find('.item-total').text(formatRupiah(itemTotal));
+        
+        // Update grand totals preview
+        updateGrandTotalPreview();
+    }
+
+    // Update grand total preview (visual only)
+    function updateGrandTotalPreview() {
+        let totalItems = 0;
+        let totalPrice = 0;
+        
+        $('.quantity-input-cart').each(function() {
+            const quantity = parseInt($(this).val()) || 0;
+            const unitPrice = parseFloat($(this).closest('.cart-item').find('.unit-price').attr('data-unit-price')) || 0;
+            
+            totalItems += quantity;
+            totalPrice += (unitPrice * quantity);
         });
+        
+        // Update displays
+        $('#total-items').text(totalItems + ' Item');
+        $('#total-price').text(formatRupiah(totalPrice));
+    }
+
+    // Format rupiah function
+    function formatRupiah(number) {
+        return 'Rp ' + new Intl.NumberFormat('id-ID').format(number);
+    }
+
+    // Enhanced remove button with AJAX (optional enhancement)
+    $('.remove-item-btn').on('click', function(e) {
+        if (!confirm('Yakin ingin menghapus item ini?')) {
+            e.preventDefault();
+            return false;
+        }
+        
+        const cartItem = $(this).closest('.cart-item');
+        const itemName = cartItem.find('h6 a').text();
+        
+        // Add loading state
+        $(this).prop('disabled', true);
+        
+        // Let the default link action proceed, but add visual feedback
+        cartItem.fadeOut(300);
+        
+        // Show success message
+        setTimeout(function() {
+            if ($('.alert-success').length === 0) {
+                const successMessage = `
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        ${itemName} berhasil dihapus dari keranjang
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                `;
+                $('.container').prepend(successMessage);
+            }
+        }, 300);
     });
 });
 </script>
