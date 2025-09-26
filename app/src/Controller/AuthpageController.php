@@ -54,10 +54,6 @@ class AuthPageController extends PageController
                     }
                 }
             }
-
-            // Final fallback - generate from domain
-            $domain = $_SERVER['HTTP_HOST'] ?? 'localhost';
-            return "noreply@{$domain}";
         }
 
     public function login(HTTPRequest $request)

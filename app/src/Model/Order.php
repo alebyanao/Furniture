@@ -21,7 +21,10 @@ class Order extends DataObject
         "UpdateAt" => "Datetime",
         "ExpiresAt" => "Datetime",
         "StockReduced" => "Boolean(0)", // Flag untuk track apakah stok sudah dikurangi
+        "InvoiceSent" => "Boolean",
     ];
+
+
     private static $has_one = [
         "Member" => Member::class,
         "ShippingAddress" => ShippingAddress::class,

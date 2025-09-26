@@ -121,10 +121,6 @@ namespace {
                     }
                 }
             }
-
-            // Final fallback - generate from domain
-            $domain = $_SERVER['HTTP_HOST'] ?? 'localhost';
-            return "noreply@{$domain}";
         }
 
 

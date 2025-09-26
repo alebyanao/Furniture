@@ -4,8 +4,6 @@ use SilverStripe\Control\Director;
 use SilverStripe\Control\Email\Email;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Control\HTTPResponse;
-use SilverStripe\Core\Environment;
-use SilverStripe\Dev\Debug;
 use SilverStripe\SiteConfig\SiteConfig;
 use Dompdf\Dompdf;
 use Dompdf\Options;
@@ -45,10 +43,6 @@ class InvoiceController extends PageController
                     }
                 }
             }
-
-            // Final fallback - generate from domain
-            $domain = $_SERVER['HTTP_HOST'] ?? 'localhost';
-            return "noreply@{$domain}";
         }
 
 
@@ -218,49 +212,6 @@ class InvoiceController extends PageController
                     'application/pdf'
                 );
 
-            // if ($SiteConfig->FooterLogo && $SiteConfig->FooterLogo->exists()) {
-            //     try {
-            //         $logoData = $SiteConfig->FooterLogo->getString();
-            //         $logoExtension = $SiteConfig->FooterLogo->getExtension();
-            //         $logoMimeType = $SiteConfig->FooterLogo->getMimeType();
-            //         $logoFilename = 'company-logo.' . $logoExtension;
-
-            //         $email->addAttachmentFromData(
-            //             $logoData,
-            //             $logoFilename,
-            //             $logoMimeType,
-            //         );
-
-            //         $emailData['LogoCID'] = 'cid:' . $logoFilename;
-            //     } catch (Exception $e) {
-            //         error_log('Logo attachment failed: ' . $e->getMessage());
-            //     }
-            // }
-
-             if ($SiteConfig->Footerlogo && $SiteConfig->Footerlogo->exists()) {
-                $logoName = $SiteConfig->Footerlogo->Name;
-                $fullFooterLogoPath = BASE_PATH . '/public/assets/Uploads/' . $logoName;
-
-                if (file_exists($fullFooterLogoPath)) {
-                    $logoData = file_get_contents($fullFooterLogoPath);
-                    $imageInfo = getimagesize($fullFooterLogoPath);
-                    $logoMimeType = $imageInfo['mime'] ?? 'image/png';
-                    $logoExtension = pathinfo($logoName, PATHINFO_EXTENSION);
-                    $logoFilename = 'company-logo.' . $logoExtension;
-
-                    $email->addAttachmentFromData(
-                        $logoData,
-                        $logoFilename,
-                        $logoMimeType,
-                    );
-
-                    $emailData['LogoCID'] = 'cid:' . $logoFilename;
-                    error_log('Logo attached as inline with CID: ' . $emailData['LogoCID']);
-                } else {
-                    error_log('Logo file not found: ' . $fullFooterLogoPath);
-                }
-            }
-
             $email->setData($emailData);
             $email->send();
 
@@ -308,7 +259,19 @@ class InvoiceController extends PageController
      */
     public static function sendInvoiceAfterPayment($order)
     {
+        if ($order->InvoiceSent) {
+            return false; // sudah pernah kirim
+        }
+
         $controller = new InvoiceController();
-        return $controller->sendInvoiceToMember($order);
+        $sent = $controller->sendInvoiceToMember($order);
+
+        if ($sent) {
+            $order->InvoiceSent = true;
+            $order->write();
+        }
+
+        return $sent;
     }
+
 }

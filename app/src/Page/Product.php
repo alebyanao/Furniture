@@ -30,8 +30,6 @@ class Product extends DataObject
     ];
 
     private static $has_many = [
-        'HomePage' => HomePage::class,
-        'ProductPage' => ProductPage::class,
         'Wishlist' => Wishlist::class,
         'CartItem' => CartItem::class,
         'OrderItem' => OrderItem::class,
