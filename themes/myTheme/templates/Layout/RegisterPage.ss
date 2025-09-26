@@ -39,7 +39,7 @@
         <div class="mb-3">
             <label for="register_password_1" class="form-label">Sandi</label>
             <input type="password" class="form-control" id="register_password_1" name="register_password_1" required>
-            <div class="form-text">Minimal 6 karakter</div>
+            <div class="form-text">Minimal 8 karakter</div>
         </div>
 
         <div class="mb-3">

@@ -19,7 +19,7 @@
         <div class="mb-3">
             <label for="new_password_1" class="form-label">Password Baru</label>
             <input type="password" class="form-control" id="new_password_1" name="new_password_1" required>
-            <div class="form-text">Minimal 6 karakter</div>
+            <div class="form-text">Minimal 8 karakter</div>
         </div>
 
         <div class="mb-3">

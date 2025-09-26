@@ -380,6 +380,16 @@ class AuthPageController extends PageController
 
         try {
             $verifyLink = rtrim($ngrokUrl, '/') . '/verify?token=' . $member->VerificationToken;
+            
+            // Gunakan DBHTMLText untuk memastikan HTML di-render dengan benar
+            $messageContent = \SilverStripe\ORM\FieldType\DBHTMLText::create();
+            $messageContent->setValue("
+                Terima kasih telah mendaftar. Silakan klik link di bawah untuk memverifikasi akun Anda:
+                <br><br>
+                <a href='{$verifyLink}' style='background-color: #b78b5c; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;'>Verifikasi Akun</a>
+                <br><br>
+                Atau salin link ini: {$verifyLink}
+            ");
 
             $emailObj = \SilverStripe\Control\Email\Email::create()
                 ->setTo($member->Email)
@@ -389,12 +399,7 @@ class AuthPageController extends PageController
                 ->setData([
                     'Name' => $member->FirstName,
                     'SenderEmail' => $member->Email,
-                    'MessageContent' => "
-                        Terima kasih telah mendaftar. Silakan klik link di bawah untuk memverifikasi akun Anda:
-                        <br><br>
-                        <a href='{$verifyLink}' style='background-color: #b78b5c; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;'>Verifikasi Akun</a>
-                        <br><br>
-                        Atau salin link ini: {$verifyLink}",
+                    'MessageContent' => $messageContent,
                     'SiteName' => $siteConfig->Title,
                 ]);
 
@@ -416,6 +421,18 @@ class AuthPageController extends PageController
 
         try {
             $resetLink = rtrim($ngrokUrl, '/') . '/auth/reset-password?token=' . $resetToken;
+            
+            // Gunakan DBHTMLText
+            $messageContent = \SilverStripe\ORM\FieldType\DBHTMLText::create();
+            $messageContent->setValue("
+                Kami menerima permintaan untuk reset password akun Anda.
+                <br><br>
+                <a href='{$resetLink}' style='background-color: #b78b5c; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;'>Reset Password</a>
+                <br><br>
+                Atau salin link ini: {$resetLink}
+                <br><br>
+                Link ini berlaku selama 1 jam. Jika Anda tidak meminta reset password, abaikan email ini.
+            ");
 
             $emailObj = \SilverStripe\Control\Email\Email::create()
                 ->setTo($member->Email)
@@ -425,14 +442,7 @@ class AuthPageController extends PageController
                 ->setData([
                     'Name' => $member->FirstName,
                     'SenderEmail' => $member->Email,
-                    'MessageContent' => "
-                        Kami menerima permintaan untuk reset password akun Anda.
-                        <br><br>
-                        <a href='{$resetLink}' style='background-color: #b78b5c; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;'>Reset Password</a>
-                        <br><br>
-                        Atau salin link ini: {$resetLink}
-                        <br><br>
-                        Link ini berlaku selama 1 jam. Jika Anda tidak meminta reset password, abaikan email ini.",
+                    'MessageContent' => $messageContent,
                     'SiteName' => $siteConfig->Title,
                 ]);
 
@@ -442,4 +452,5 @@ class AuthPageController extends PageController
             return false;
         }
     }
+
 }
