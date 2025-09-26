@@ -81,8 +81,8 @@
           
           <% if not $SiteConfig.Service1Title && not $SiteConfig.Service2Title && not $SiteConfig.Service3Title && not $SiteConfig.Service4Title && not $SiteConfig.Service5Title %>
             <!-- Fallback services -->
-            <li><a href="#" class="text-decoration-none text-white">Log In</a></li>
-            <li><a href="#" class="text-decoration-none text-white">Wishlist</a></li>
+            <li><a href="$BaseHref/auth/login" class="text-decoration-none text-white">Log In</a></li>
+            <li><a href="$BaseHref/wishlist" class="text-decoration-none text-white">Wishlist</a></li>
             <li><a href="#" class="text-decoration-none text-white">Return Policy</a></li>
             <li><a href="#" class="text-decoration-none text-white">Privacy policy</a></li>
             <li><a href="#" class="text-decoration-none text-white">Shopping FAQs</a></li>
@@ -112,11 +112,10 @@
           
           <% if not $SiteConfig.AboutUsURL && not $SiteConfig.PrivacyPolicyURL && not $SiteConfig.TermsConditionsURL && not $SiteConfig.CareersURL && not $SiteConfig.ContactUsURL %>
             <!-- Fallback company links -->
-            <li><a href="/" class="text-decoration-none text-white">Home</a></li>
-            <li><a href="/about-us" class="text-decoration-none text-white">About us</a></li>
-            <li><a href="/pages" class="text-decoration-none text-white">Pages</a></li>
-            <li><a href="/blog" class="text-decoration-none text-white">Blog</a></li>
-            <li><a href="/contact-us" class="text-decoration-none text-white">Contact us</a></li>
+            <li><a href="$BaseHref/home" class="text-decoration-none text-white">Home</a></li>
+            <li><a href="$BaseHref/shop" class="text-decoration-none text-white">Shop</a></li>
+            <li><a href="$BaseHref/blog" class="text-decoration-none text-white">Blog</a></li>
+            <li><a href="$BaseHref/contact" class="text-decoration-none text-white">Contact us</a></li>
           <% end_if %>
         </ul>
       </div>

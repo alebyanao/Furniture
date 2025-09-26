@@ -10,6 +10,7 @@ use SilverStripe\Forms\FormAction;
 use SilverStripe\Forms\RequiredFields;
 use SilverStripe\SiteConfig\SiteConfig;
 use SilverStripe\Security\Security;
+use SilverStripe\Control\HTTPResponse;
 
 class ContactPageController extends PageController
 {
@@ -49,42 +50,76 @@ class ContactPageController extends PageController
 
     public function doSubmit($data, Form $form)
     {
-        $config = SiteConfig::current_site_config();
-        $to = $config->CompanyEmail;
+        try {
+            $config = SiteConfig::current_site_config();
+            $to = $config->CompanyEmail;
 
-        if (!$to) {
-            $form->sessionMessage('Company Email belum diatur di SiteConfig', 'bad');
-            return $this->redirectBack();
+            if (!$to) {
+                return $this->redirect($this->Link() . '?error=' . urlencode('Company Email belum diatur di SiteConfig'));
+            }
+
+            // Validasi email format
+            if (!filter_var($data['Email'], FILTER_VALIDATE_EMAIL)) {
+                return $this->redirect($this->Link() . '?error=' . urlencode('Format email tidak valid'));
+            }
+
+            $from = $data['Email'];
+            $subject = 'Pesan Kontak dari ' . $data['Name'];
+            $body = sprintf(
+                "Nama: %s\nEmail: %s\n\nPesan:\n%s",
+                $data['Name'],
+                $data['Email'],
+                $data['Message']
+            );
+
+            $email = Email::create()
+                ->setTo($to)
+                ->setFrom($from)
+                ->setReplyTo($data['Email'])
+                ->setSubject($subject)
+                ->setBody(nl2br($body));
+
+            // Kirim email - asumsi selalu berhasil kecuali ada exception
+            $email->send();
+
+            // Jika sampai sini berarti tidak ada exception, anggap berhasil
+            return $this->redirect($this->Link() . '?success=' . urlencode('Pesan berhasil dikirim. Terima kasih sudah menghubungi kami!'));
+
+        } catch (Exception $e) {
+            // Log error
+            user_error('Contact form error: ' . $e->getMessage(), E_USER_WARNING);
+            return $this->redirect($this->Link() . '?error=' . urlencode('Maaf, terjadi kesalahan sistem. Silakan coba lagi nanti.'));
         }
+    }
 
-        // Tentukan email pengirim
-        $member = Security::getCurrentUser();
-        if ($member && $member->Email) {
-            $from = $member->Email; // email user yang login
-        } else {
-            $from = $data['Email']; // email dari input form
+    // Method untuk mengambil pesan dari URL parameter
+    public function getAlertMessage()
+    {
+        $request = $this->getRequest();
+        
+        if ($success = $request->getVar('success')) {
+            return urldecode($success);
         }
+        
+        if ($error = $request->getVar('error')) {
+            return urldecode($error);
+        }
+        
+        return null;
+    }
 
-        $subject = 'Pesan Kontak dari ' . $data['Name'];
-        $body = sprintf(
-            "Nama: %s\nEmail: %s\n\nPesan:\n%s",
-            $data['Name'],
-            $data['Email'],
-            $data['Message']
-        );
-
-        $email = Email::create()
-            ->setTo($to)
-            ->setFrom($from)
-            ->setSubject($subject)
-            ->setBody(nl2br($body));
-
-        // tambahkan reply-to supaya admin bisa langsung balas
-        $email->setReplyTo($data['Email']);
-
-        $email->send();
-
-        $form->sessionMessage('Pesan berhasil dikirim. Terima kasih sudah menghubungi kami!', 'good');
-        return $this->redirectBack();
+    public function getAlertType()
+    {
+        $request = $this->getRequest();
+        
+        if ($request->getVar('success')) {
+            return 'success';
+        }
+        
+        if ($request->getVar('error')) {
+            return 'danger';
+        }
+        
+        return null;
     }
 }

@@ -1,5 +1,6 @@
 <?php
 
+use PHPUnit\Framework\MockObject\Builder\Identity;
 use SilverStripe\Control\Director;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Core\Environment;
@@ -17,6 +18,7 @@ class AuthPageController extends PageController
 {
     private static $allowed_actions = [
         'login',
+        'logout',
         'register',
         'forgotPassword',
         'resetPassword',
@@ -25,6 +27,7 @@ class AuthPageController extends PageController
 
     private static $url_handlers = [
         'login' => 'login',
+        'logout' => 'logout', 
         'register' => 'register',
         'forgot-password' => 'forgotPassword',
         'reset-password' => 'resetPassword'
@@ -117,6 +120,19 @@ class AuthPageController extends PageController
         ]);
         
         return $this->customise($data)->renderWith(['RegisterPage', 'Page']);
+    }
+
+    public function logout(HTTPRequest $request) 
+    {
+        Injector::inst()->get(IdentityStore::class)->logOut($request);
+        
+        $this->getRequest()->getSession()->set('FlashMessage', [
+            'Message' => 'Anda telah berhasil keluar.',
+            'Type' => 'primary'
+        ]);
+
+        return $this->redirect(Director::absoluteBaseURL() . '/auth/login' );
+
     }
 
     public function forgotPassword(HTTPRequest $request)

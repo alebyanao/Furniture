@@ -103,7 +103,7 @@
                       <li><a class="dropdown-item" href="$BaseHref/profile"><i class="bi bi-person me-2"></i>Profil</a></li>
                       <li><a class="dropdown-item" href="$BaseHref/order"><i class="bi bi-box me-2"></i>Pesanan</a></li>
                       <li><hr class="dropdown-divider"></li>
-                      <li><a class="dropdown-item text-danger" href="$BaseHref/Security/logout"><i class="bi bi-box-arrow-right me-2"></i>Keluar</a></li>
+                      <li><a class="dropdown-item text-danger" href="$BaseHref/auth/logout"><i class="bi bi-box-arrow-right me-2"></i>Keluar</a></li>
                     <% else %>
                       <li><a class="dropdown-item" href="$BaseHref/auth/login"><i class="bi bi-box-arrow-in-right me-2"></i>Masuk</a></li>
                       <li><a class="dropdown-item" href="$BaseHref/auth/register"><i class="bi bi-person-plus me-2"></i>Daftar</a></li>

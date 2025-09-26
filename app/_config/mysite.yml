@@ -4,6 +4,14 @@ Name: myproject
 SilverStripe\Core\Manifest\ModuleManifest:
   project: app
 
+SilverStripe\SpamProtection\Extension\FormSpamProtectionExtension:
+  default_spam_protector: UndefinedOffset\NoCaptcha\Forms\NoCaptchaProtector
+
+UndefinedOffset\NoCaptcha\Forms\NocaptchaField:
+  site_key: "6Lcjf9UrAAAAALhO_dGF6rdtKAJlhWgNJcn08Pbn"
+  secret_key: "6Lcjf9UrAAAAAJZ_KJO7GfazoF9459ZWA3V5JC"
+  
+  
 # UTF8MB4 has limited support in older MySQL versions.
 # Remove this configuration if you experience issues.
 ---
