@@ -47,7 +47,7 @@
             <input type="password" class="form-control" id="register_password_2" name="register_password_2" required>
         </div>
 
-        <button type="submit" class="btn btn-success w-100 mb-3">Daftar</button>
+        <button type="submit" class="btn btn-primary w-100 mb-3">Daftar</button>
         
         <div class="text-center">
             <p class="mb-0">Sudah memiliki akun? <a href="$BaseHref/auth/login">Masuk di sini</a></p>
