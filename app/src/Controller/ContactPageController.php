@@ -9,8 +9,7 @@ use SilverStripe\Forms\Form;
 use SilverStripe\Forms\FormAction;
 use SilverStripe\Forms\RequiredFields;
 use SilverStripe\SiteConfig\SiteConfig;
-use SilverStripe\Security\Security;
-use SilverStripe\Control\HTTPResponse;
+use SilverStripe\Forms\LiteralField;
 
 class ContactPageController extends PageController
 {
@@ -32,7 +31,13 @@ class ContactPageController extends PageController
 
             TextareaField::create('Message', 'Pesan')
                 ->setAttribute('placeholder', 'Tulis pesan Anda di sini...')
-                ->addExtraClass('form-control')
+                ->addExtraClass('form-control'),
+
+            // reCAPTCHA manual HTML
+            LiteralField::create('RecaptchaHTML', 
+                '<div class="g-recaptcha" data-sitekey="6Le_X9grAAAAAE7KZbpJHGw8EzGSsVHy8dinfgLx"></div>
+                <script src="https://www.google.com/recaptcha/api.js" async defer></script>'
+            )
         );
 
         $actions = FieldList::create(
@@ -44,6 +49,7 @@ class ContactPageController extends PageController
 
         $form = Form::create($this, 'ContactForm', $fields, $actions, $required);
         $form->addExtraClass('needs-validation');
+        $form->setTemplate('ContactForm'); // Opsional: gunakan template custom
 
         return $form;
     }
@@ -51,19 +57,41 @@ class ContactPageController extends PageController
     public function doSubmit($data, Form $form)
     {
         try {
+            // Validasi reCAPTCHA manual
+            $recaptchaResponse = $this->getRequest()->postVar('g-recaptcha-response');
+            
+            if (empty($recaptchaResponse)) {
+                $form->sessionMessage('Silakan centang reCAPTCHA', 'bad');
+                return $this->redirectBack();
+            }
+
+            // Verifikasi dengan Google
+            $secretKey = '6Le_X9grAAAAAFyMjFmGkk_YfUejzEh-yOZbfefx';
+            $verifyURL = 'https://www.google.com/recaptcha/api/siteverify';
+            
+            $response = file_get_contents($verifyURL . '?secret=' . $secretKey . '&response=' . $recaptchaResponse . '&remoteip=' . $_SERVER['REMOTE_ADDR']);
+            $responseData = json_decode($response);
+
+            if (!$responseData->success) {
+                $form->sessionMessage('Verifikasi reCAPTCHA gagal. Silakan coba lagi.', 'bad');
+                return $this->redirectBack();
+            }
+
+            // Lanjutkan proses email
             $config = SiteConfig::current_site_config();
             $to = $config->CompanyEmail;
 
             if (!$to) {
-                return $this->redirect($this->Link() . '?error=' . urlencode('Company Email belum diatur di SiteConfig'));
+                $form->sessionMessage('Company Email belum diatur di SiteConfig', 'bad');
+                return $this->redirectBack();
             }
 
-            // Validasi email format
             if (!filter_var($data['Email'], FILTER_VALIDATE_EMAIL)) {
-                return $this->redirect($this->Link() . '?error=' . urlencode('Format email tidak valid'));
+                $form->sessionMessage('Format email tidak valid', 'bad');
+                return $this->redirectBack();
             }
 
-            $from = $data['Email'];
+            $from = 'abelyanaumioctaviani06@gmail.com'; // Ganti dengan domain Anda
             $subject = 'Pesan Kontak dari ' . $data['Name'];
             $body = sprintf(
                 "Nama: %s\nEmail: %s\n\nPesan:\n%s",
@@ -79,20 +107,19 @@ class ContactPageController extends PageController
                 ->setSubject($subject)
                 ->setBody(nl2br($body));
 
-            // Kirim email - asumsi selalu berhasil kecuali ada exception
             $email->send();
 
-            // Jika sampai sini berarti tidak ada exception, anggap berhasil
-            return $this->redirect($this->Link() . '?success=' . urlencode('Pesan berhasil dikirim. Terima kasih sudah menghubungi kami!'));
+            $form->sessionMessage('Pesan berhasil dikirim. Terima kasih sudah menghubungi kami!', 'good');
+            return $this->redirect($this->Link() . '?success=' . urlencode('Pesan berhasil dikirim.'));
 
         } catch (Exception $e) {
-            // Log error
             user_error('Contact form error: ' . $e->getMessage(), E_USER_WARNING);
-            return $this->redirect($this->Link() . '?error=' . urlencode('Maaf, terjadi kesalahan sistem. Silakan coba lagi nanti.'));
+            $form->sessionMessage('Maaf, terjadi kesalahan sistem. Silakan coba lagi nanti.', 'bad');
+            return $this->redirect($this->Link() . '?error=' . urlencode('Verifikasi reCAPTCHA gagal.'));
+
         }
     }
 
-    // Method untuk mengambil pesan dari URL parameter
     public function getAlertMessage()
     {
         $request = $this->getRequest();

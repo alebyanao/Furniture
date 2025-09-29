@@ -76,7 +76,6 @@ namespace {
                 "CurrentUser" => $this->getCurrentUser(),
                 "WishlistCount" => $this->getWishlistCount(),
                 "CartCount" => $this->getCartCount(),
-                "DeliveryMethod" => DeliveryMethod::get(),
                 "PaymentMethod" => PaymentMethod::get(),
                 "CustomSiteConfig" => SiteConfig::current_site_config(),
             ];
