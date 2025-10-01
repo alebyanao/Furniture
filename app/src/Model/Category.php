@@ -14,7 +14,6 @@ class Category extends DataObject
         'IsActive' => 'Boolean'
     ];
 
-    // Ubah dari has_many ke belongs_many_many
     private static $belongs_many_many = [
         'Products' => 'Product'
     ];
