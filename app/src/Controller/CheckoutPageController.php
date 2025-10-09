@@ -66,6 +66,10 @@ class CheckoutPageController extends PageController
             'TotalItems' => $this->getTotalItems(),
             'TotalPrice' => $this->getTotalPrice(),
             'FormattedTotalPrice' => $this->getFormattedTotalPrice(),
+            'OriginalTotalPrice' => $this->getOriginalTotalPrice(),
+            'FormattedOriginalTotalPrice' => $this->getFormattedOriginalTotalPrice(),
+            'TotalProductDiscount' => $this->getTotalProductDiscount(),
+            'FormattedTotalProductDiscount' => $this->getFormattedTotalProductDiscount(),
             'TotalWeight' => $this->getTotalWeight(),
             'PaymentMethods' => $this->getPaymentMethod(),
         ]);

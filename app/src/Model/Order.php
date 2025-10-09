@@ -201,6 +201,7 @@ class Order extends DataObject
         }
         
         $this->write();
+
         return true;
     }
 
@@ -341,6 +342,7 @@ class Order extends DataObject
         if ($this->Status == 'shipped') {
             $this->Status = 'completed';
             $this->write();
+            
             return true;
         }
         return false;
@@ -407,4 +409,6 @@ class Order extends DataObject
         }
         return new ArrayList($result);
     }
+
+
 }

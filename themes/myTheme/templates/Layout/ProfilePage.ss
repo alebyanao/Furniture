@@ -21,7 +21,6 @@
                 <% if $Member %>
                     <form method="POST" action="$BaseHref/profile" class="profile-form">
                         <input type="hidden" name="SecurityID" value="$SecurityID" />
-                        
                         <div class="mb-3">
                             <label for="first_name" class="form-label">Nama Depan *</label>
                             <input type="text" class="form-control" id="first_name" name="first_name" value="$Member.FirstName" required>

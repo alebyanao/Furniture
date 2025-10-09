@@ -7,6 +7,7 @@ use SilverStripe\Forms\NumericField;
 use SilverStripe\Forms\TextareaField;
 use SilverStripe\Forms\CheckboxSetField;
 use SilverStripe\Security\Security;
+use SilverStripe\ORM\FieldType\DBDatetime;
 
 class Product extends DataObject 
 {
@@ -22,7 +23,7 @@ class Product extends DataObject
     ];
 
     private static $has_one = [
-        'Image' => Image::class
+        'Image' => Image::class,
     ];
 
     private static $many_many = [
@@ -40,9 +41,9 @@ class Product extends DataObject
         'Image'
     ];
 
-    private static $defaults = [
-        'Stock' => 0
-    ];
+    // private static $defaults = [
+    //     'Stock' => 0
+    // ];
 
     private static $summary_fields = [
         'Name' => 'Product Name',
@@ -210,4 +211,5 @@ class Product extends DataObject
         return $wishlist ? true : false;
     }
 
+  
 }

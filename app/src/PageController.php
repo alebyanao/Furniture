@@ -6,6 +6,7 @@ namespace {
     use SilverStripe\Security\Security;
     use SilverStripe\View\ArrayData;
     use SilverStripe\SiteConfig\SiteConfig;
+
     // Tambahkan import untuk Wishlist class
     // use App\Model\Wishlist; // sesuaikan dengan namespace Wishlist Anda
 
@@ -55,6 +56,7 @@ namespace {
         {
             return $this->flashMessage;
         }
+        
 
         protected function init()
         {
@@ -69,6 +71,7 @@ namespace {
             }
         }
 
+
         protected function getCommonData()
         {
             return [
@@ -76,7 +79,6 @@ namespace {
                 "CurrentUser" => $this->getCurrentUser(),
                 "WishlistCount" => $this->getWishlistCount(),
                 "CartCount" => $this->getCartCount(),
-                "PaymentMethod" => PaymentMethod::get(),
                 "CustomSiteConfig" => SiteConfig::current_site_config(),
             ];
         }
@@ -97,8 +99,8 @@ namespace {
         }
 
          /**
-     * Safely get company email from SiteConfig
-     */
+         * Safely get company email from SiteConfig
+         */
         private function getCompanyEmailSafe($siteConfig)
         {
             // First try CompanyEmail from CustomSiteConfig extension

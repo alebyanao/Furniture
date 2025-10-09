@@ -34,7 +34,6 @@ class HomePageController extends PageController
             ->limit(6);
     }
 
-    
     public function getFeaturedProducts()
     {
         $category = Category::get()->filter('Name', 'Featured Product')->first();

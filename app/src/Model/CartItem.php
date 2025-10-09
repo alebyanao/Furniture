@@ -25,4 +25,5 @@ class CartItem extends DataObject
     {
         return 'Rp ' . number_format($this->getSubtotal(), 0, '.', '.');
     }
+
 }
