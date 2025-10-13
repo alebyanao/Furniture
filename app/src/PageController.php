@@ -80,6 +80,7 @@ namespace {
                 "WishlistCount" => $this->getWishlistCount(),
                 "CartCount" => $this->getCartCount(),
                 "CustomSiteConfig" => SiteConfig::current_site_config(),
+                "PaymentMethod" => PaymentMethod::get(),
             ];
         }
 
