@@ -11,6 +11,11 @@ class MemberExtension extends DataExtension
         'ResetPasswordToken' => 'Varchar(255)',
         'ResetPasswordExpiry' => 'Datetime',
         'GoogleID' => 'Varchar(255)',
+        'TotalTransactions' => 'Double',
+        'MembershipTier' => 'Int',
+        'MembershipTierName' => 'Varchar(100)',
+        'MembershipPeriodeStart' => 'Datetime',
+        'LastMembershipUpdate' => 'Datetime'
     ];
 
     private static $indexes = [
@@ -23,5 +28,28 @@ class MemberExtension extends DataExtension
     {
         $fields['GoogleID'] = 'GoogleID';
         $fields['IsVerified'] = 'Terverifikasi';
+        $fields['MembershipTierName'] = 'Membership Tier';
+        $fields['FormattedTotalTransactions'] = 'Total Transaksi';
+        $fields['MembershipPeriodStart'] = 'Periode Mulai';
+        $fields['LastMembershipUpdate'] = 'Terakhir Update';
+    }
+
+    public function getFormattedTotalTransactions()
+    {
+        return 'Rp ' . number_format($this->owner->TotalTransactions, 0, '.', '.');
+    }
+
+    public function getMembershipTierName()
+    {
+        return MembershipService::getMembershipTierName($this->owner->MembershipTier);
+    }
+
+    public function onBeforeWrite()
+    {
+        parent::onBeforeWrite();
+
+        if (!$this->owner->MembershipPeriodeStart) {
+            $this->owner->MembershipPeriodeStart = date('Y-m-d H:i:s');
+        }
     }
 }

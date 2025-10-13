@@ -81,6 +81,9 @@ namespace {
                 "CartCount" => $this->getCartCount(),
                 "CustomSiteConfig" => SiteConfig::current_site_config(),
                 "PaymentMethod" => PaymentMethod::get(),
+                "MembershipTier" => $this->getMembershipTier(),
+                "MembershipTierName" => $this->getMembershipTierName(),
+                "MembershipProgress" => $this->getMembershipProgress(),
             ];
         }
 
@@ -157,6 +160,42 @@ namespace {
             }
             return 0;
         }
+
+        public function getMembershipTier()
+        {
+            if ($this->isLoggedIn()) {
+                $user = $this->getCurrentUser();
+                if ($user && $user->exists()) {
+                    return MembershipService::getMembershipTier($user->ID);
+                }
+            }
+            return null;
+        }
+
+        public function getMembershipTierName()
+        {
+            if ($this->isLoggedIn()) {
+                $user = $this->getCurrentUser();
+                if ($user && $user->exists()) {
+                    $tier = MembershipService::getMembershipTier($user->ID);
+                    return MembershipService::getMembershipTierName($tier);
+                }
+            }
+            return 'Member';
+        }
+        public function getMembershipProgress()
+        {
+            if ($this->isLoggedIn()) {
+                $user = $this->getCurrentUser();
+                if ($user && $user->exists()) {
+                    return ArrayData::create(MembershipService::getProgressToNextTier($user->ID));
+                }
+            }
+            return null;
+        }
+
         
     }
+
+    
 }
