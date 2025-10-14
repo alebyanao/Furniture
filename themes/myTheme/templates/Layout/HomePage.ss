@@ -1,3 +1,5 @@
+<% include PopupAdvertisement %>
+
 <!-- Hero Banner Section -->
 <% if $hasHeroBanners %>
 <section class="hero-section position-relative overflow-hidden">
@@ -59,7 +61,7 @@
 </section>
 <% end_if %>
 
-<% include PromoCard %>
+<%-- <% include PromoCard %> --%>
 
 <!-- FEATURED PRODUCTS SECTION (Carousel Layout) -->
 <% if $hasFeaturedProducts %>

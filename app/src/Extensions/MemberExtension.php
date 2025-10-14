@@ -15,7 +15,9 @@ class MemberExtension extends DataExtension
         'MembershipTier' => 'Int',
         'MembershipTierName' => 'Varchar(100)',
         'MembershipPeriodeStart' => 'Datetime',
-        'LastMembershipUpdate' => 'Datetime'
+        'LastMembershipUpdate' => 'Datetime',
+        'PopupViewCount' => 'Int',
+        'LastPopupDate' => 'Date'
     ];
 
     private static $indexes = [
@@ -32,6 +34,8 @@ class MemberExtension extends DataExtension
         $fields['FormattedTotalTransactions'] = 'Total Transaksi';
         $fields['MembershipPeriodStart'] = 'Periode Mulai';
         $fields['LastMembershipUpdate'] = 'Terakhir Update';
+        $fields['PopupViewCount'] = 'Pop-up count';
+        $fields['LastPopupDate'] = 'Terakhir Pop-up Update';
     }
 
     public function getFormattedTotalTransactions()

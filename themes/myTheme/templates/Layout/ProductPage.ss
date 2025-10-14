@@ -5,7 +5,7 @@
         </div> --%>
     </div>
 
-<% include Promocard     %>
+<%-- <% include Promocard %> --%>
 
 <%-- PRODUCT --%>
     <div class="row">
