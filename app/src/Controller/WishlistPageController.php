@@ -10,7 +10,8 @@ class WishlistPageController extends PageController
         'product',
         'add',
         'remove',
-        'index'
+        'index',
+        'toggle'
     ];
 
     private static $url_segment = 'wishlist';
@@ -21,6 +22,7 @@ class WishlistPageController extends PageController
         'product/$ID' => 'product',
         'add/$ID' => 'add',
         'remove/$ID' => 'remove',
+        'toggle/$ID' => 'toggle',
         '' => 'index'
     ];
 
@@ -103,5 +105,41 @@ class WishlistPageController extends PageController
             'Product' => $product
         ])->renderWith(['ProductDetailShow', 'Page']);
     }
+
+    public function toggle(HTTPRequest $request)
+{
+    if (!$this->isLoggedIn()) {
+        return $this->redirect(Director::absoluteBaseURL() . '/auth/login');
+    }
+
+    $productID = $request->param('ID');
+    $product = Product::get()->byID($productID);
+
+    if (!$product) {
+        return $this->httpError(404);
+    }
+
+    $user = $this->getCurrentUser();
+
+    // cek apakah produk sudah ada di wishlist
+    $existing = Wishlist::get()->filter([
+        'ProductID' => $productID,
+        'MemberID' => $user->ID
+    ])->first();
+
+    if ($existing) {
+        // kalau sudah ada → hapus
+        $existing->delete();
+    } else {
+        // kalau belum ada → tambah
+        $wishlist = Wishlist::create();
+        $wishlist->ProductID = $productID;
+        $wishlist->MemberID = $user->ID;
+        $wishlist->write();
+    }
+
+    return $this->redirectBack();
+}
+
 
 }

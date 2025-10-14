@@ -85,22 +85,22 @@
                 <i class="bi bi-cart"></i>
               </a>
                 <% if $IsInWishlist %>
-                  <button type="button"
-                          class="btn btn-outline-secondary rounded-pill d-flex align-items-center justify-content-center"
-                          style="width: 40px; height: 38px; background-color: #ff6b6b; border-color: #ff6b6b;"
-                          title="Remove from Wishlist"
-                          onclick="window.location.href='{$BaseHref}/wishlist/add/$ID'">
-                    <i class="fas fa-heart" style="color: white;"></i>
-                  </button>
-                <% else %>
-                  <button type="button"
-                          class="btn btn-outline-secondary rounded-pill d-flex align-items-center justify-content-center"
-                          style="width: 40px; height: 38px;"
-                          title="Add to Wishlist"
-                          onclick="window.location.href='{$BaseHref}/wishlist/add/$ID'">
-                    <i class="far fa-heart"></i>
-                  </button>
-                <% end_if %>
+                <button type="button"
+                        class="btn btn-outline-secondary rounded-pill d-flex align-items-center justify-content-center"
+                        style="width: 40px; height: 38px; background-color: #ff6b6b; border-color: #ff6b6b;"
+                        title="Remove from Wishlist"
+                        onclick="window.location.href='$BaseHref/wishlist/toggle/$ID'">
+                  <i class="fas fa-heart" style="color: white;"></i>
+                </button>
+              <% else %>
+                <button type="button"
+                        class="btn btn-outline-secondary rounded-pill d-flex align-items-center justify-content-center"
+                        style="width: 40px; height: 38px;"
+                        title="Add to Wishlist"
+                        onclick="window.location.href='$BaseHref/wishlist/toggle/$ID'">
+                  <i class="far fa-heart"></i>
+                </button>
+              <% end_if %>
               </div>
 
             </div>
