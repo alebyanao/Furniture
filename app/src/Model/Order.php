@@ -47,8 +47,10 @@ class Order extends DataObject
         "CreateAt" => "Create At",
         "UpdateAt" => "Update At",
         "ExpiresAt" => "Expires At",
-        "ShippingAddress.Address" => "Address",
+        "ShippingAddressSummary" => "Shipping Address",
     ];
+
+    private static $default_sort = 'CreateAt DESC';
 
     /**
      * Set default values and expiry time
@@ -413,5 +415,20 @@ class Order extends DataObject
         return new ArrayList($result);
     }
 
+    public function getShippingAddressSummary()
+    {
+        if ($this->ShippingAddressID && $this->ShippingAddress()->exists()) {
+            $addr = $this->ShippingAddress();
+            return sprintf(
+                "%s, %s, %s, %s (%s)",
+                $addr->Address,
+                $addr->DistrictName,
+                $addr->CityName,
+                $addr->ProvinceName,
+                $addr->PostalCode
+            );
+        }
+        return "-";
+    }
 
 }

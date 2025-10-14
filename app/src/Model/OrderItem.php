@@ -19,6 +19,15 @@ class OrderItem extends DataObject
         "Review" => Review::class,
     ];
 
+    private static $summary_fields = [
+        'ID' => 'ID',
+        'Product.Title' => 'Product',
+        'Quantity' => 'Qty',
+        'FormattedPrice' => 'Price',
+        'FormattedSubtotal' => 'Subtotal',
+        'Order.OrderCode' => 'Order Code',
+    ];
+
 
     /**
      * Get formatted price
