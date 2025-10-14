@@ -24,7 +24,6 @@ class OrderItem extends DataObject
         'Product.Title' => 'Product',
         'Quantity' => 'Qty',
         'FormattedPrice' => 'Price',
-        'FormattedSubtotal' => 'Subtotal',
         'Order.OrderCode' => 'Order Code',
     ];
 
