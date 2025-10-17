@@ -11,10 +11,10 @@
 				<% if $Image.exists %>
 					<% if $Link %>
 					<a href="$Link" target="_blank">
-						<img src="$Image.URL" alt="$Title" class="img-fluid w-80" style="max-height: 60vh; object-fit: contain;">
+						<img src="$Image.URL" alt="$Title" class="img-fluid w-100" style="max-height: 80vh; object-fit: contain;">
 					</a>
 					<% else %>
-					<img src="$Image.URL" alt="$Title" class="img-fluid w-80" style="max-height: 60vh; object-fit: contain;">
+					<img src="$Image.URL" alt="$Title" class="img-fluid w-100" style="max-height: 80vh; object-fit: contain;">
 					<% end_if %>
 				<% else %>
 					<div class="alert alert-warning m-3">

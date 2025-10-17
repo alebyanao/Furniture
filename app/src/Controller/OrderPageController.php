@@ -213,12 +213,13 @@ class OrderPageController extends PageController
         $showname = (bool) $request->postVar('showname');
 
         if (!$rating || $rating < 1 || $rating > 5) {
-            $this->getRequest()->getSession()->set('ReviewError', 'Rating harus antara 1-5');
+            $this->getRequest()->getSession()->set('ReviewError', 'Harap beri rating antara 1 hingga 5');
             return $this->redirectBack();
         }
 
-        if (!$message || strlen($message) < 5) {
-            $this->getRequest()->getSession()->set('ReviewError', 'Pesan review minimal 5 karakter');
+        // Pesan opsional — jika kosong, tetap lanjut
+        if ($message && strlen($message) < 5) {
+            $this->getRequest()->getSession()->set('ReviewError', 'Pesan review minimal 5 karakter jika diisi');
             return $this->redirectBack();
         }
 

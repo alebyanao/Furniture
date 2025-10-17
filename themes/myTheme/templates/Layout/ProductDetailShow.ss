@@ -126,7 +126,7 @@
               <strong><% if $ShowName == true %>$Member.FirstName $Member.Surname<% else %>Anonim<% end_if %></strong> 
               <span class="text-warning">★ $Rating</span>
               <p class="mb-0">
-                <% if $Message %>$Message<% else %>Tidak ada komentar<% end_if %>
+                $Message
               </p>
             </div>
           <% end_loop %>

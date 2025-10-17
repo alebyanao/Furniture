@@ -97,10 +97,16 @@
                                                 <% if $Review.Rating < 1 %><span class="text-muted">☆</span><% end_if %>
                                                 ($Review.Rating/5)
                                             </div>
-                                            <div class="mb-2">
-                                                <strong>Pesan:</strong><br>
-                                                $Review.Message
-                                            </div>
+                                            <% if $Review.Message %>
+                                                <div class="mb-2">
+                                                    <strong>Pesan:</strong><br>
+                                                    $Review.Message
+                                                </div>
+                                            <% else %>
+                                                <div class="mb-2 text-muted fst-italic">
+                                                    (Tidak ada pesan)
+                                                </div>
+                                            <% end_if %>
                                             <small class="text-muted">Diulas pada: $Review.FormattedDate</small>
                                         </div>
                                     <% else_if $CanReview %>
@@ -116,9 +122,10 @@
                                                     <input type="hidden" name="rating" id="rating-$Item.ID" required />
                                                 </div>
                                             </div>
+                              
                                             <div class="mb-3">
-                                                <label for="message-$Item.ID" class="form-label">Pesan *</label>
-                                                <textarea class="form-control" id="message-$Item.ID" name="message" rows="3" placeholder="Tulis ulasan Anda..." required minlength="5"></textarea>
+                                                <label for="message-$Item.ID" class="form-label">Pesan</label>
+                                                <textarea class="form-control" id="message-$Item.ID" name="message" rows="3" placeholder="Tulis ulasan Anda... "></textarea>
                                             </div>
                                             <div class="mb-3">
                                                 <label class="form-label">Tampilkan Nama Anda?</label>
