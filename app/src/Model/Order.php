@@ -3,6 +3,8 @@
 use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Security\Member;
+use SilverStripe\Security\Permission;
+use SilverStripe\Forms\ReadonlyField;
 
 class Order extends DataObject
 {
@@ -68,6 +70,58 @@ class Order extends DataObject
         if ($this->Status == 'pending' && !$this->ExpiresAt) {
             $this->ExpiresAt = date('Y-m-d H:i:s', strtotime('+24 hours'));
         }
+    }
+
+public function getCMSFields()
+    {
+        $fields = parent::getCMSFields();
+
+        // Semua field jadi readonly, kecuali Status
+        foreach ($fields->dataFields() as $field) {
+            if ($field->getName() !== 'Status') {
+                $fields->replaceField(
+                    $field->getName(),
+                    $field->performReadonlyTransformation()
+                );
+            }
+        }
+
+        // Ganti ShippingAddressID jadi alamat lengkap readonly
+        if ($this->ShippingAddressID && $this->ShippingAddress()->exists()) {
+            $fields->replaceField(
+                'ShippingAddressID',
+                ReadonlyField::create(
+                    'ShippingAddressSummary',
+                    'Shipping Address',
+                    $this->getShippingAddressSummary()
+                )
+            );
+        }
+
+        return $fields;
+    }
+
+    public function canCreate($member = null, $context = [])
+    {
+        return false;
+    }
+
+    // ✅ Admin tetap boleh edit (untuk ubah status)
+    public function canEdit($member = null)
+    {
+        return Permission::check('CMS_ACCESS_CMSMain');
+    }
+
+    // ✅ Admin tetap boleh lihat data
+    public function canView($member = null)
+    {
+        return true;
+    }
+
+    // ✅ Boleh delete jika perlu (bisa diset false juga)
+    public function canDelete($member = null)
+    {
+        return false;
     }
 
     /**
