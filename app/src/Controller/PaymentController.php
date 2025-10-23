@@ -25,18 +25,11 @@ class PaymentController extends PageController
     public function initiate(HTTPRequest $request)
     {
         $orderID = $request->param('ID');
-
-        if (!$orderID) {
-            return $this->httpError(400, 'Order ID required');
-        }
+        if (!$orderID) return $this->httpError(400, 'Order ID required');
 
         $order = Order::get()->byID($orderID);
+        if (!$order) return $this->httpError(404, 'Order not found');
 
-        if (!$order) {
-            return $this->httpError(404, 'Order not found');
-        }
-
-        // Check if user is logged in and owns the order
         $currentUser = Security::getCurrentUser();
         if (!$currentUser || $order->MemberID != $currentUser->ID) {
             return $this->httpError(403, 'Access denied');
@@ -53,8 +46,41 @@ class PaymentController extends PageController
             return $this->redirect(Director::absoluteBaseURL() . 'order/detail/' . $orderID);
         }
 
+        // 🔍 Cari transaksi pending untuk order ini
+        $existing = PaymentTransaction::get()
+            ->filter([
+                'OrderID' => $order->ID,
+                'Status'  => 'pending'
+            ])
+            ->first();
+
+        if ($existing && $existing->PaymentURL) {
+            // Gunakan transaksi lama
+            return $this->redirect($existing->PaymentURL);
+        }
+
+    // Pastikan order sudah punya MerchantOrderID tetap
+        if (!$order->MerchantOrderID) {
+            $order->MerchantOrderID = 'ORDER-' . $order->ID;
+            $order->write();
+        }
+
+        // Cek transaksi existing
+        $existing = PaymentTransaction::get()
+            ->filter([
+                'OrderID' => $order->ID,
+                'Status' => 'pending'
+            ])
+            ->first();
+
+        if ($existing && $existing->PaymentURL) {
+            return $this->redirect($existing->PaymentURL);
+        }
+
+        // Panggil Duitku pakai MerchantOrderID yang fix
         $duitku = new DuitkuService();
-        $response = $duitku->createTransaction($order);
+        $response = $duitku->createTransaction($order, $order->MerchantOrderID);
+
 
         if ($response && $response['success']) {
             $transaction = PaymentTransaction::create();
@@ -63,18 +89,17 @@ class PaymentController extends PageController
             $transaction->TransactionID = $response['merchantOrderId'] ?? $order->OrderCode;
             $transaction->Amount = $order->getGrandTotal();
             $transaction->Status = 'pending';
-            $transaction->CreateAt = date('Y-m-d H:i:s');
+            $transaction->PaymentURL = $response['paymentUrl'] ?? null;
+            $transaction->CreatedAt = date('Y-m-d H:i:s');
             $transaction->write();
 
             $order->Status = 'pending_payment';
             $order->write();
 
-            if (isset($response['paymentUrl']) && !empty($response['paymentUrl'])) {
-                return $this->redirect($response['paymentUrl']);
-            }
+            return $this->redirect($transaction->PaymentURL);
         }
 
-        $errorMessage = isset($response['error']) ? $response['error'] : 'Gagal membuat transaksi pembayaran';
+        $errorMessage = $response['error'] ?? 'Gagal membuat transaksi pembayaran';
         $request->getSession()->set('PaymentError', $errorMessage);
         return $this->redirect(Director::absoluteBaseURL() . 'order/detail/' . $orderID);
     }

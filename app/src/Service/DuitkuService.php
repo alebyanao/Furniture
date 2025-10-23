@@ -53,9 +53,9 @@ class DuitkuService
     /**
      * Create payment transaction
      */
-    public function createTransaction($order)
+    public function createTransaction($order, $merchantOrderId = null)
     {
-        $merchantOrderId = 'ORDER-' . $order->ID . '-' . time();
+        $merchantOrderId = $merchantOrderId ?: 'ORDER-' . $order->ID;
         $paymentAmount = $order->TotalPrice + $order->ShippingCost;
         $signature = md5($this->merchantCode . $merchantOrderId . $paymentAmount . $this->apiKey);
 

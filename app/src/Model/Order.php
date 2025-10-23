@@ -5,6 +5,7 @@ use SilverStripe\ORM\DataObject;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\Permission;
 use SilverStripe\Forms\ReadonlyField;
+use SilverStripe\Forms\LiteralField;
 
 class Order extends DataObject
 {
@@ -24,16 +25,17 @@ class Order extends DataObject
         "ExpiresAt" => "Datetime",
         "StockReduced" => "Boolean(0)", // Flag untuk track apakah stok sudah dikurangi
         "InvoiceSent" => "Boolean",
+        "MerchantOrderID" => 'Varchar(50)',
     ];
 
 
     private static $has_one = [
         "Member" => Member::class,
         "ShippingAddress" => ShippingAddress::class,
+        "PaymentTransaction" => PaymentTransaction::class,
     ];
     private static $has_many = [
         "OrderItem" => OrderItem::class,
-        "PaymentTransaction" => PaymentTransaction::class,
     ];
     private static $summary_fields = [
         "Member.FirstName" => "Name",
@@ -72,7 +74,7 @@ class Order extends DataObject
         }
     }
 
-public function getCMSFields()
+    public function getCMSFields()
     {
         $fields = parent::getCMSFields();
 
@@ -98,7 +100,25 @@ public function getCMSFields()
             );
         }
 
-        return $fields;
+            if ($this->PaymentTransaction()->exists()) {
+        $trx = $this->PaymentTransaction();
+        $fields->addFieldsToTab('Root.Payment', [
+            ReadonlyField::create('TransactionID', 'Transaction ID', $trx->TransactionID),
+            ReadonlyField::create('PaymentGateway', 'Gateway', ucfirst($trx->PaymentGateway)),
+            ReadonlyField::create('Amount', 'Nominal Pembayaran', 'Rp ' . number_format($trx->Amount, 0, ',', '.')),
+            ReadonlyField::create('Status', 'Status Pembayaran', ucfirst($trx->Status)),
+            ReadonlyField::create('PaymentURL', 'Payment URL', $trx->PaymentURL),
+            ReadonlyField::create('Created', 'Tanggal Dibuat', $trx->Created),
+            ReadonlyField::create('LastEdited', 'Terakhir Diperbarui', $trx->LastEdited)
+        ]);
+        } else {
+            $fields->addFieldToTab(
+                'Root.Payment',
+                LiteralField::create('NoPaymentTrx', '<p><em>Belum ada transaksi pembayaran untuk order ini.</em></p>')
+        );
+    }
+
+    return $fields;
     }
 
     public function canCreate($member = null, $context = [])
