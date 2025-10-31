@@ -30,7 +30,7 @@ class MemberExtension extends DataExtension
     {
         $fields['GoogleID'] = 'GoogleID';
         $fields['IsVerified'] = 'Terverifikasi';
-        $fields['MembershipTierName'] = 'Membership Tier';
+        $fields['MembershipTierName'] = 'Membership Tier'; 
         $fields['FormattedTotalTransactions'] = 'Total Transaksi';
         $fields['MembershipPeriodStart'] = 'Periode Mulai';
         $fields['LastMembershipUpdate'] = 'Terakhir Update';

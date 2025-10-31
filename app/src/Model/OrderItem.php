@@ -69,7 +69,7 @@ class OrderItem extends DataObject
     }
 
     /**
-     * Get range helper for templates
+     * Get range helper for template
      */
     public function Range($start, $end)
     {

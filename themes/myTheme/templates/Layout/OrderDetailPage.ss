@@ -154,7 +154,7 @@
                         <div class="alert alert-warning mb-0">
                             Tidak ada item dalam pesanan ini.
                         </div>
-                    <% end_if %>
+                    <% end_if %> 
                 </div>
             </div>
         </div>

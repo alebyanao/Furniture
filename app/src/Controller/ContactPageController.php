@@ -65,7 +65,7 @@ class ContactPageController extends PageController
                 return $this->redirectBack();
             }
 
-            // Verifikasi dengan Google
+            // Verifikasi dengan Google 
             $secretKey = '6Le_X9grAAAAAFyMjFmGkk_YfUejzEh-yOZbfefx';
             $verifyURL = 'https://www.google.com/recaptcha/api/siteverify';
             

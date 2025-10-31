@@ -18,7 +18,7 @@
                                         $PaymentStatusLabel.RAW
                                     </div>
                                 </div>
-
+ 
                                 <!-- Card Body -->
                                 <div class="card-body">
                                     <ul class="list-unstyled mb-0 small">

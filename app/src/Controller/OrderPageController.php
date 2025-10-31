@@ -217,7 +217,7 @@ class OrderPageController extends PageController
             return $this->redirectBack();
         }
 
-        // Pesan opsional — jika kosong, tetap lanjut
+        // Pesan opsional, jika kosong tetap lanjut
         if ($message && strlen($message) < 5) {
             $this->getRequest()->getSession()->set('ReviewError', 'Pesan review minimal 5 karakter jika diisi');
             return $this->redirectBack();

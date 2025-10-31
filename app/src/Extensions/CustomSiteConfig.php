@@ -26,7 +26,7 @@ class CustomSiteConfig extends DataExtension
         
         // Top Bar
         'TopBarText' => 'Text',
-        'TopBarEnabled' => 'Boolean',
+        'TopBarEnabled' => 'Boolean', 
         
         // Contact Info
         'ContactDescription' => 'Text',

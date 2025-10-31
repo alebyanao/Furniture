@@ -115,7 +115,7 @@ class AuthPageController extends PageController
         $data = array_merge($this->getCommonData(), [
             'Title' => 'Register',
             'ValidationResult' => $validationResult,
-            'flashMessages' => $flashMessage // pass ke template
+            'flashMessages' => $flashMessage 
         ]);
         
         return $this->customise($data)->renderWith(['RegisterPage', 'Page']);

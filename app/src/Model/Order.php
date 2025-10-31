@@ -15,7 +15,7 @@ class Order extends DataObject
         "Status" => "Enum('pending,pending_payment,paid,processing,shipped,completed,cancelled', 'pending')",
         "TotalPrice" => "Double",
         "ShippingCost" => "Double",
-        "PaymentFee" => "Double",  // Added PaymentFee field
+        "PaymentFee" => "Double",  
         "PaymentMethod" => "Varchar(255)",
         "PaymentStatus" => "Enum('unpaid,paid,failed,refunded', 'unpaid')",
         "ShippingCourier" => "Varchar(255)",
@@ -23,7 +23,7 @@ class Order extends DataObject
         "CreateAt" => "Datetime",
         "UpdateAt" => "Datetime",
         "ExpiresAt" => "Datetime",
-        "StockReduced" => "Boolean(0)", // Flag untuk track apakah stok sudah dikurangi
+        "StockReduced" => "Boolean(0)", 
         "InvoiceSent" => "Boolean",
         "MerchantOrderID" => 'Varchar(50)',
     ];

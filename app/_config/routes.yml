@@ -1,0 +1,9 @@
+---
+Name: api-routes
+After:
+  - '#rootroutes'
+  - '#coreroutes'
+---
+SilverStripe\Control\Director:
+  rules:
+    'api//$Action/$ID': 'RestfullApiController'

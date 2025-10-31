@@ -14,7 +14,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
     <% end_if %>
-    
+     
     <% if CartItems && CartItems.Count > 0 %>
     <form method="post" action="$BaseHref/checkout/process-order" target="_blank" id="checkoutForm">
         <!-- Alamat Pengiriman -->
