@@ -38,12 +38,12 @@ class PaymentController extends PageController
         if ($order->isExpired()) {
             $order->cancelOrder();
             $request->getSession()->set('PaymentError', 'Pesanan telah kedaluwarsa');
-            return $this->redirect(Director::absoluteBaseURL() . 'order/detail/' . $orderID);
+            return $this->redirect(Director::absoluteBaseURL() . '/order/detail/' . $orderID);
         }
 
         if (!$order->canBePaid()) {
             $request->getSession()->set('PaymentError', 'Pesanan tidak dapat dibayar');
-            return $this->redirect(Director::absoluteBaseURL() . 'order/detail/' . $orderID);
+            return $this->redirect(Director::absoluteBaseURL() . '/order/detail/' . $orderID);
         }
 
         // 🔍 Cari transaksi pending untuk order ini
@@ -101,7 +101,7 @@ class PaymentController extends PageController
 
         $errorMessage = $response['error'] ?? 'Gagal membuat transaksi pembayaran';
         $request->getSession()->set('PaymentError', $errorMessage);
-        return $this->redirect(Director::absoluteBaseURL() . 'order/detail/' . $orderID);
+        return $this->redirect(Director::absoluteBaseURL() . '/order/detail/' . $orderID);
     }
 
     /**

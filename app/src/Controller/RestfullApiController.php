@@ -17,6 +17,7 @@ class RestfullApiController extends Controller
     private static $url_segment = 'api';
 
     private static $allowed_actions = [
+        //login
         'index',
         'login',
         'register',
@@ -25,7 +26,7 @@ class RestfullApiController extends Controller
         'forgotpassword',
         'updatePassword',
         'member',
-        'siteconfig'
+        'siteconfig',
     ];
 
     private static $url_handlers = [
@@ -38,6 +39,9 @@ class RestfullApiController extends Controller
         'member' => 'member',
         'siteconfig' => 'siteconfig',
         '' => 'index',
+        //product
+        
+
     ];
 
     /* INDEX */
@@ -47,14 +51,19 @@ class RestfullApiController extends Controller
             'message' => 'SilverStripe Furniture API',
             'status' => 'running',
             'endpoints' => [
-                'POST /api/login' => 'Login user',
-                'POST /api/register' => 'Register user',
-                'POST /api/logout' => 'Logout user',
-                'POST /api/google-auth' => 'Google authentication',
-                'POST /api/forgotpassword' => 'Forgot password',
-                'PUT /api/member/password' => 'Update password',
-                'GET /api/member' => 'Get member info',
-                'GET /api/siteconfig' => 'Get site configuration',
+                'authentication' => [
+                    'POST /api/login' => 'Login user',
+                    'POST /api/register' => 'Register user',
+                    'POST /api/logout' => 'Logout user',
+                    'POST /api/google-auth' => 'Google authentication',
+                    'POST /api/forgotpassword' => 'Forgot password',
+                    'GET /api/siteconfig' => 'Get site configuration',
+                ],
+                'member' => [
+                    'GET /api/member' => 'Get current member profile',
+                    'PUT /api/member' => 'Update member profile',
+                    'PUT /api/member/password' => 'Update member password',
+                ],
             ]
         ]);
     }
@@ -329,4 +338,5 @@ class RestfullApiController extends Controller
         $response->addHeader('Access-Control-Allow-Credentials', 'true');
         return $response;
     }
+
 }
