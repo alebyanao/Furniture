@@ -11,6 +11,7 @@ use SilverStripe\Security\IdentityStore;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\Security;
 use SilverStripe\SiteConfig\SiteConfig;
+use SilverStripe\Security\Permission;
 
 class RestfullApiController extends Controller
 {
@@ -25,8 +26,22 @@ class RestfullApiController extends Controller
         'googleAuth',
         'forgotpassword',
         'updatePassword',
+        'resetpassword',
         'member',
         'siteconfig',
+        //product
+        'products',
+        'product',
+        'createProduct',
+        'updateProduct',
+        'deleteProduct',
+        'productsByCategory',
+        //wishlist
+        'wishlist',
+        'addToWishlist',
+        'removeFromWishlist',
+        'checkWishlist',
+        'toggleWishlist',
     ];
 
     private static $url_handlers = [
@@ -36,11 +51,23 @@ class RestfullApiController extends Controller
         'google-auth' => 'googleAuth',
         'forgotpassword' => 'forgotpassword',
         'member/password' => 'updatePassword',
+        'resetpassword' => 'resetpassword',
         'member' => 'member',
         'siteconfig' => 'siteconfig',
         '' => 'index',
         //product
-        
+        'products/$ID/DELETE' => 'deleteProduct',
+        'products/$ID/PUT' => 'updateProduct',
+        'products/$ID' => 'product',
+        'products/category/$CategoryID' => 'productsByCategory',
+        'products/POST' => 'createProduct',
+        'products' => 'products',
+        //wishlist
+        'wishlist/add' => 'addToWishlist',
+        'wishlist/remove/$ID!' => 'removeFromWishlist',
+        'wishlist/check/$ID!' => 'checkWishlist',
+        'wishlist/toggle/$ID!' => 'toggleWishlist',
+        'wishlist' => 'wishlist',
 
     ];
 
@@ -251,9 +278,10 @@ class RestfullApiController extends Controller
         $member->ResetPasswordExpiry = date('Y-m-d H:i:s', strtotime('+1 hour'));
         $member->write();
 
+        $ngrokURL = Environment::getEnv('NGROK_URL');
         $siteConfig = SiteConfig::current_site_config();
         $fromEmail = $this->getCompanyEmailSafe($siteConfig);
-        $resetLink = rtrim(Environment::getEnv('SS_BASE_URL'), '/') . '/resetpassword?token=' . $token;
+        $resetLink = rtrim($ngrokURL, '/') . '/auth/resetpassword?token=' . $token;
 
         Email::create()
             ->setTo($member->Email)
@@ -272,6 +300,46 @@ class RestfullApiController extends Controller
             'message' => 'Link reset password telah dikirim ke email Anda.'
         ]);
     }
+
+    public function resetpassword(HTTPRequest $request)
+    {
+        if (!$request->isPOST()) {
+            return $this->jsonResponse(['error' => 'Only POST allowed'], 405);
+        }
+
+        $data = json_decode($request->getBody(), true);
+        $token = $data['token'] ?? '';
+        $newPassword = $data['new_password'] ?? '';
+
+        if (!$token || !$newPassword) {
+            return $this->jsonResponse(['error' => 'Token dan password wajib diisi'], 400);
+        }
+
+        if (strlen($newPassword) < 8) {
+            return $this->jsonResponse(['error' => 'Password minimal 8 karakter'], 400);
+        }
+
+        $member = Member::get()->filter('ResetPasswordToken', $token)->first();
+        
+        if (!$member) {
+            return $this->jsonResponse(['error' => 'Token tidak valid'], 404);
+        }
+
+        if (strtotime($member->ResetPasswordExpiry) < time()) {
+            return $this->jsonResponse(['error' => 'Token sudah kadaluarsa'], 400);
+        }
+
+        $member->changePassword($newPassword);
+        $member->ResetPasswordToken = null;
+        $member->ResetPasswordExpiry = null;
+        $member->write();
+
+        return $this->jsonResponse([
+            'success' => true,
+            'message' => 'Password berhasil direset'
+        ]);
+    }
+
     public function updatePassword(HTTPRequest $request)
     {
         $member = Security::getCurrentUser();
@@ -338,5 +406,462 @@ class RestfullApiController extends Controller
         $response->addHeader('Access-Control-Allow-Credentials', 'true');
         return $response;
     }
+
+    public function products(HTTPRequest $request)
+    {
+        // Pagination
+        $limit = (int)$request->getVar('limit') ?: 12;
+        $offset = (int)$request->getVar('offset') ?: 0;
+        
+        // Base query
+        $query = Product::get();
+        
+        // Filter by search keyword
+        if ($search = $request->getVar('search')) {
+            $query = $query->filterAny([
+                'Name:PartialMatch' => $search,
+                'Description:PartialMatch' => $search,
+            ]);
+        }
+        
+        // Filter by category
+        if ($categoryId = $request->getVar('category')) {
+            $query = $query->filter('Categories.ID', $categoryId);
+        }
+        
+        // Filter by stock status
+        if ($inStock = $request->getVar('in_stock')) {
+            if ($inStock === '1' || $inStock === 'true') {
+                $query = $query->filter('Stock:GreaterThan', 0);
+            }
+        }
+        
+        // Filter by price range
+        if ($minPrice = $request->getVar('min_price')) {
+            $query = $query->filter('Price:GreaterThanOrEqual', $minPrice);
+        }
+        if ($maxPrice = $request->getVar('max_price')) {
+            $query = $query->filter('Price:LessThanOrEqual', $maxPrice);
+        }
+        
+        // Sorting
+        $sort = $request->getVar('sort') ?: 'Created';
+        $order = $request->getVar('order') ?: 'DESC';
+        $allowedSort = ['Name', 'Price', 'Created', 'Stock'];
+        $allowedOrder = ['ASC', 'DESC'];
+        
+        if (in_array($sort, $allowedSort) && in_array($order, $allowedOrder)) {
+            $query = $query->sort("$sort $order");
+        }
+        
+        // Total count before pagination
+        $total = $query->count();
+        
+        // Apply pagination
+        $products = $query->limit($limit, $offset);
+        
+        // Format response
+        $data = [];
+        foreach ($products as $product) {
+            $data[] = $this->formatProductData($product);
+        }
+        
+        return $this->jsonResponse([
+            'success' => true,
+            'data' => $data,
+            'meta' => [
+                'total' => $total,
+                'limit' => $limit,
+                'offset' => $offset,
+                'count' => count($data)
+            ]
+        ]);
+    }
+
+    /**
+     * GET /api/products/{id}
+     * Detail produk
+     */
+    public function product(HTTPRequest $request)
+    {
+        $id = $request->param('ID');
+        
+        if (!$id) {
+            return $this->jsonResponse(['error' => 'Product ID required'], 400);
+        }
+        
+        $product = Product::get()->byID($id);
+        
+        if (!$product) {
+            return $this->jsonResponse(['error' => 'Product not found'], 404);
+        }
+    
+        // Include reviews
+        $reviews = [];
+        foreach ($product->Review() as $review) {
+            $reviews[] = [
+                'id' => $review->ID,
+                'rating' => $review->Rating,
+                'comment' => $review->Comment,
+                'member_name' => $review->Member()->FirstName,
+                'created' => $review->Created,
+            ];
+        }
+        
+        return $this->jsonResponse([
+            'success' => true,
+            'data' => array_merge(
+                $this->formatProductData($product, true),
+                [
+                    'reviews' => $reviews,
+                ]
+            )
+        ]);
+    }
+
+    /**
+     * GET /api/products/category/{categoryId}
+     * Produk berdasarkan kategori
+     */
+    public function productsByCategory(HTTPRequest $request)
+    {
+        $categoryId = $request->param('CategoryID');
+        
+        if (!$categoryId) {
+            return $this->jsonResponse(['error' => 'Category ID required'], 400);
+        }
+        
+        $category = Category::get()->byID($categoryId);
+        
+        if (!$category) {
+            return $this->jsonResponse(['error' => 'Category not found'], 404);
+        }
+        
+        $limit = (int)$request->getVar('limit') ?: 12;
+        $offset = (int)$request->getVar('offset') ?: 0;
+        
+        $products = Product::get()
+            ->filter('Categories.ID', $categoryId)
+            ->limit($limit, $offset);
+        
+        $data = [];
+        foreach ($products as $product) {
+            $data[] = $this->formatProductData($product);
+        }
+        
+        return $this->jsonResponse([
+            'success' => true,
+            'category' => [
+                'id' => $category->ID,
+                'name' => $category->Name,
+            ],
+            'data' => $data,
+            'meta' => [
+                'total' => Product::get()->filter('Categories.ID', $categoryId)->count(),
+                'limit' => $limit,
+                'offset' => $offset,
+            ]
+        ]);
+    }
+
+    /**
+     * POST /api/products
+     * Create produk baru (Admin only)
+     */
+    public function createProduct(HTTPRequest $request)
+    {
+        if (!$request->isPOST()) {
+            return $this->jsonResponse(['error' => 'Only POST allowed'], 405);
+        }
+        
+        $member = Security::getCurrentUser();
+        if (!$member || !Permission::check('ADMIN', 'any', $member)) {
+            return $this->jsonResponse(['error' => 'Admin access required'], 403);
+        }
+        
+        $data = json_decode($request->getBody(), true);
+        
+        // Validation
+        if (empty($data['name']) || empty($data['price'])) {
+            return $this->jsonResponse(['error' => 'Name and price are required'], 400);
+        }
+        
+        try {
+            $product = Product::create();
+            $product->Name = $data['name'];
+            $product->Price = (int)$data['price'];
+            $product->Discount = (int)($data['discount'] ?? 0);
+            $product->Description = $data['description'] ?? '';
+            $product->Stock = (int)($data['stock'] ?? 0);
+            $product->Weight = (int)($data['weight'] ?? 0);
+            $product->write();
+            
+            // Add categories
+            if (!empty($data['categories']) && is_array($data['categories'])) {
+                $product->Categories()->setByIDList($data['categories']);
+            }
+            
+            return $this->jsonResponse([
+                'success' => true,
+                'message' => 'Product created successfully',
+                'data' => $this->formatProductData($product)
+            ], 201);
+            
+        } catch (Exception $e) {
+            return $this->jsonResponse(['error' => 'Failed to create product: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * PUT /api/products/{id}
+     * Update produk (Admin only)
+     */
+    public function updateProduct(HTTPRequest $request)
+    {
+        if (!$request->isPUT() && !$request->isPOST()) {
+            return $this->jsonResponse(['error' => 'Only PUT/POST allowed'], 405);
+        }
+        
+        $member = Security::getCurrentUser();
+        if (!$member || !Permission::check('ADMIN', 'any', $member)) {
+            return $this->jsonResponse(['error' => 'Admin access required'], 403);
+        }
+        
+        $id = $request->param('ID');
+        $product = Product::get()->byID($id);
+        
+        if (!$product) {
+            return $this->jsonResponse(['error' => 'Product not found'], 404);
+        }
+        
+        $data = json_decode($request->getBody(), true);
+        
+        try {
+            if (isset($data['name'])) $product->Name = $data['name'];
+            if (isset($data['price'])) $product->Price = (int)$data['price'];
+            if (isset($data['discount'])) $product->Discount = (int)$data['discount'];
+            if (isset($data['description'])) $product->Description = $data['description'];
+            if (isset($data['stock'])) $product->Stock = (int)$data['stock'];
+            if (isset($data['weight'])) $product->Weight = (int)$data['weight'];
+            
+            $product->write();
+            
+            // Update categories
+            if (isset($data['categories']) && is_array($data['categories'])) {
+                $product->Categories()->setByIDList($data['categories']);
+            }
+            
+            return $this->jsonResponse([
+                'success' => true,
+                'message' => 'Product updated successfully',
+                'data' => $this->formatProductData($product)
+            ]);
+            
+        } catch (Exception $e) {
+            return $this->jsonResponse(['error' => 'Failed to update product: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * DELETE /api/products/{id}
+     * Delete produk (Admin only)
+     */
+    public function deleteProduct(HTTPRequest $request)
+    {
+        if (!$request->isDELETE() && !$request->isPOST()) {
+            return $this->jsonResponse(['error' => 'Only DELETE/POST allowed'], 405);
+        }
+        
+        $member = Security::getCurrentUser();
+        if (!$member || !Permission::check('ADMIN', 'any', $member)) {
+            return $this->jsonResponse(['error' => 'Admin access required'], 403);
+        }
+        
+        $id = $request->param('ID');
+        $product = Product::get()->byID($id);
+        
+        if (!$product) {
+            return $this->jsonResponse(['error' => 'Product not found'], 404);
+        }
+        
+        try {
+            $product->delete();
+            
+            return $this->jsonResponse([
+                'success' => true,
+                'message' => 'Product deleted successfully'
+            ]);
+            
+        } catch (Exception $e) {
+            return $this->jsonResponse(['error' => 'Failed to delete product: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Helper: Format product data untuk response
+     */
+    private function formatProductData($product, $detailed = false)
+    {
+        $data = [
+            'id' => $product->ID,
+            'name' => $product->Name,
+            'price' => $product->Price,
+            'formatted_price' => $product->getFormattedPrice(),
+            'discount' => $product->Discount,
+            'formatted_discount' => $product->getFormattedDiscount(),
+            'discount_price' => $product->getDiscountPrice(),
+            'formatted_discount_price' => $product->getFormattedDiscountPrice(),
+            'discount_percentage' => $product->getDiscountPercentage(),
+            'has_discount' => $product->hasDiscount(),
+            'stock' => $product->Stock,
+            'stock_status' => $product->getStockStatus(),
+            'is_in_stock' => $product->isInStock(),
+            'weight' => $product->Weight,
+            'categories' => $product->getCategoryNames(),
+            'first_category' => $product->getFirstCategoryName(),
+            'average_rating' => $product->getAverageRating(),
+            'review_count' => $product->Review()->count(),
+            'is_in_wishlist' => $product->getIsInWishlist(),
+            'image_url' => $product->Image()->exists() ? $product->Image()->AbsoluteURL : null,
+            'created' => $product->Created,
+        ];
+        
+        if ($detailed) {
+            $data['description'] = $product->Description;
+        }
+        
+        return $data;
+    }
+
+    
+public function wishlist(HTTPRequest $request)
+{
+    $member = Security::getCurrentUser();
+    if (!$member) {
+        return $this->jsonResponse(['error' => 'Unauthorized'], 401);
+    }
+
+    $items = Wishlist::get()->filter('MemberID', $member->ID);
+
+    $formatted = [];
+    foreach ($items as $item) {
+        $formatted[] = [
+            'id' => $item->ID,
+            'product_id' => $item->ProductID,
+            'product' => $item->Product()->toMap(),
+        ];
+    }
+
+    return $this->jsonResponse([
+        'success' => true,
+        'wishlist' => $formatted
+    ]);
+}
+
+public function addToWishlist(HTTPRequest $request)
+{
+    $member = Security::getCurrentUser();
+    if (!$member) {
+        return $this->jsonResponse(['error' => 'Unauthorized'], 401);
+    }
+
+    $data = json_decode($request->getBody(), true);
+    $productID = $data['product_id'] ?? null;
+
+    if (!$productID || !Product::get()->byID($productID)) {
+        return $this->jsonResponse(['error' => 'Invalid product'], 400);
+    }
+
+    $exists = Wishlist::get()->filter([
+        'ProductID' => $productID,
+        'MemberID' => $member->ID
+    ])->first();
+
+    if ($exists) {
+        return $this->jsonResponse(['message' => 'Already in wishlist'], 200);
+    }
+
+    $wishlist = Wishlist::create();
+    $wishlist->ProductID = $productID;
+    $wishlist->MemberID = $member->ID;
+    $wishlist->write();
+
+    return $this->jsonResponse(['success' => true, 'message' => 'Added to wishlist']);
+}
+
+
+public function removeFromWishlist(HTTPRequest $request)
+{
+    $member = Security::getCurrentUser();
+    if (!$member) {
+        return $this->jsonResponse(['error' => 'Unauthorized'], 401);
+    }
+
+    $id = $request->param('ID');
+    $item = Wishlist::get()->filter([
+        'ID' => $id,
+        'MemberID' => $member->ID
+    ])->first();
+
+    if ($item) {
+        $item->delete();
+    }
+
+    return $this->jsonResponse(['success' => true, 'message' => 'Removed from wishlist']);
+}
+
+public function checkWishlist(HTTPRequest $request)
+{
+    $member = Security::getCurrentUser();
+    if (!$member) {
+        return $this->jsonResponse(['error' => 'Unauthorized'], 401);
+    }
+
+    $productID = $request->param('ID');
+
+    $exists = Wishlist::get()->filter([
+        'ProductID' => $productID,
+        'MemberID' => $member->ID
+    ])->exists();
+
+    return $this->jsonResponse([
+        'product_id' => $productID,
+        'is_wishlisted' => $exists
+    ]);
+}
+
+public function toggleWishlist(HTTPRequest $request)
+{
+    $member = Security::getCurrentUser();
+    if (!$member) {
+        return $this->jsonResponse(['error' => 'Unauthorized'], 401);
+    }
+
+    $productID = $request->param('ID');
+    $existing = Wishlist::get()->filter([
+        'ProductID' => $productID,
+        'MemberID' => $member->ID
+    ])->first();
+
+    if ($existing) {
+        $existing->delete();
+        return $this->jsonResponse(['success' => true, 'message' => 'Removed from wishlist']);
+    }
+
+    $wishlist = Wishlist::create();
+    $wishlist->ProductID = $productID;
+    $wishlist->MemberID = $member->ID;
+    $wishlist->write();
+
+    return $this->jsonResponse(['success' => true, 'message' => 'Added to wishlist']);
+}
+
+
+
+
+
+
+
+
 
 }
