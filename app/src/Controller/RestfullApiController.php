@@ -29,6 +29,8 @@ class RestfullApiController extends Controller
         'resetpassword',
         'member',
         'siteconfig',
+        'product',
+        'products',
     ];
 
     private static $url_handlers = [
@@ -41,6 +43,8 @@ class RestfullApiController extends Controller
         'resetpassword' => 'resetpassword',
         'member' => 'member',
         'siteconfig' => 'siteconfig',
+        'product/$ID' => 'product',
+        'products' => 'products',
         '' => 'index',
     ];
 
@@ -377,6 +381,114 @@ class RestfullApiController extends Controller
         $response->addHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
         $response->addHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
         $response->addHeader('Access-Control-Allow-Credentials', 'true');
+        return $response;
+    }
+
+    public function product(HTTPRequest $request)
+    {
+        if (!$request->isGET()) {
+            return $this->jsonResponse(['error' => 'Only GET method allowed'], 405);
+        }
+
+        $id = $request->param('ID');
+        if (!$id || !is_numeric($id)) {
+            return $this->jsonResponse(['error' => 'Invalid product ID'], 400);
+        }
+
+        $product = Product::get()->byID($id);
+        if (!$product) {
+            return $this->jsonResponse(['error' => 'Product not found'], 404);
+        }
+
+        $user = Security::getCurrentUser();
+
+        // Basic data
+        $data = [
+            'id' => $product->ID,
+            'name' => $product->Name,
+            'description' => $product->Description,
+            'price' => (float) $product->Price,
+            'discount' => (float) $product->Discount,
+            'price_after_discount' => (float) $product->getDiscountPrice(),
+            'discount_percentage' => $product->hasDiscount()
+                ? round(($product->Discount / $product->Price) * 100, 2)
+                : 0,
+            'stock' => $product->Stock,
+            'stock_status' => $product->getStockStatus(),
+            'categories' => $product->getCategoryNames(),
+            'first_category' => $product->getFirstCategoryName(),
+            'rating' => $product->getAverageRating(),
+            'weight' => $product->Weight,
+            'created' => $product->Created,
+            'updated' => $product->LastEdited,
+            'image_url' => $product->Image()->exists()
+                ? $product->Image()->getAbsoluteURL()
+                : null,
+        ];
+        if (class_exists(Review::class)) {
+            $reviews = Review::get()->filter("ProductID", $product->ID);
+            $data['reviews'] = [];
+
+            foreach ($reviews as $review) {
+                $data['reviews'][] = [
+                    'id' => $review->ID,
+                    'author' => $review->Member()->FirstName ?? 'Anonymous',
+                    'rating' => $review->Rating,
+                    'message' => $review->Message,
+                    'createdAt' => $review->Created,
+                    'showName' => $review->ShowName ?? false,
+                ];
+            }
+        }
+        if (class_exists(Wishlist::class)) {
+            $data['wishlists_count'] = Wishlist::get()
+                ->filter('ProductID', $product->ID)
+                ->count();
+            $data['in_wishlist'] = $user
+                ? Wishlist::get()->filter([
+                    'ProductID' => $product->ID,
+                    'MemberID' => $user->ID
+                ])->exists()
+                : false;
+        }
+        if (class_exists(CartItem::class)) {
+            $data['in_cart'] = $user
+                ? CartItem::get()->filter([
+                    'ProductID' => $product->ID,
+                    'MemberID' => $user->ID,
+                ])->exists()
+                : false;
+        }
+
+        return $this->jsonResponse([
+            'success' => true,
+            'data' => $data
+        ]);
+    }
+
+    public function products(HTTPRequest $request)
+    {
+        $products = Product::get()
+            ->filter('Stock:GreaterThan', 0)
+            ->sort('Created', 'DESC');
+
+        $data = [];
+
+        foreach ($products as $product) {
+            $data[] = [
+                'ID' => $product->ID,
+                'Name' => $product->Name,
+                'Price' => $product->Price,
+                'Discount' => $product->Discount,
+                'FinalPrice' => $product->Price - ($product->Price * $product->Discount / 100),
+                'Stock' => $product->Stock,
+                'Image' => $product->Image()->exists() ? $product->Image()->AbsoluteLink() : null,
+                'Categories' => $product->Categories()->column('Name')
+            ];
+        }
+
+        $response = HTTPResponse::create(json_encode($data));
+        $response->addHeader('Content-Type', 'application/json');
         return $response;
     }
 }

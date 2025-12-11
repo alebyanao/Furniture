@@ -6,4 +6,4 @@ After:
 ---
 SilverStripe\Control\Director:
   rules:
-    'api//$Action/$ID': 'RestfullApiController'
+    'api': 'RestfullApiController'
