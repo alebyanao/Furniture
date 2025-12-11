@@ -7,7 +7,6 @@ use SilverStripe\Forms\NumericField;
 use SilverStripe\Forms\TextareaField;
 use SilverStripe\Forms\CheckboxSetField;
 use SilverStripe\Security\Security;
-use SilverStripe\ORM\FieldType\DBDatetime;
 
 class Product extends DataObject 
 {
@@ -40,10 +39,6 @@ class Product extends DataObject
     private static $owns = [
         'Image'
     ];
-
-    // private static $defaults = [
-    //     'Stock' => 0
-    // ];
 
     private static $summary_fields = [
         'Name' => 'Product Name',
@@ -152,31 +147,9 @@ class Product extends DataObject
         $categories = $this->Categories();
         return $categories->count() > 0 ? $categories->first()->Name : 'Uncategorized';
     }
-    
-    // Utility
     public function formatRupiahPublic($amount)
     {
         return number_format($amount, 0, ',', '.');
-    }
-
-    /**
-     * Produk lainnya (selalu tersedia di semua halaman)
-     */
-    public function getOtherProducts($limit = 4)
-    {
-        // rekomendasi produk lain berdasarkan kategori yang sama
-        $categories = $this->Categories()->column('ID');
-        if (!empty($categories)) {
-            return Product::get()
-                ->filter('Categories.ID', $categories)
-                ->exclude('ID', $this->ID)
-                ->limit($limit);
-        }
-
-        // fallback: kalau ga ada kategori, ambil produk lain random
-        return Product::get()
-            ->exclude('ID', $this->ID)
-            ->limit($limit);
     }
     
     public function getAverageRating()
