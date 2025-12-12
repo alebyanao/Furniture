@@ -31,6 +31,12 @@ class RestfullApiController extends Controller
         'siteconfig',
         'product',
         'products',
+        //cart
+        'cart',
+        'addToCart',
+        'updateCartItem',
+        'removeFromCart',
+        'clearCart',
     ];
 
     private static $url_handlers = [
@@ -46,9 +52,27 @@ class RestfullApiController extends Controller
         'product/$ID' => 'product',
         'products' => 'products',
         '' => 'index',
+        //cart
+        'cart/add' => 'addToCart',
+        'cart/update/$ID!' => 'updateCartItem',
+        'cart/remove/$ID!' => 'removeFromCart',
+        'cart/clear' => 'clearCart',
+        'cart' => 'cart',
+         
     ];
 
-    /* INDEX */
+    //helper
+    private function requireAuth()
+    {
+        $member = Security::getCurrentUser();
+
+        if (!$member) {
+            return $this->jsonResponse(['error' => 'Authentication required'], 401);
+        }
+
+        return $member;
+    }
+    // index
     public function index(HTTPRequest $request)
     {
         return $this->jsonResponse([
@@ -383,7 +407,7 @@ class RestfullApiController extends Controller
         $response->addHeader('Access-Control-Allow-Credentials', 'true');
         return $response;
     }
-
+    // product
     public function product(HTTPRequest $request)
     {
         if (!$request->isGET()) {
@@ -490,5 +514,226 @@ class RestfullApiController extends Controller
         $response = HTTPResponse::create(json_encode($data));
         $response->addHeader('Content-Type', 'application/json');
         return $response;
+    }
+    // cart
+    public function cart(HTTPRequest $request)
+    {
+        if (!$request->isGET()) {
+            return $this->jsonResponse(['error' => 'Only GET method allowed'], 405);
+        }
+
+        $member = $this->requireAuth();
+        if ($member instanceof HTTPResponse)
+            return $member;
+
+        $cartItems = CartItem::get()->filter('MemberID', $member->ID);
+
+        $items = [];
+        $subtotal = 0;
+        $totalItems = 0;
+        $totalWeight = 0;                        
+
+        foreach ($cartItems as $item) {
+            $product = $item->Product();
+
+            $items[] = [
+                'id' => $item->ID,
+                'product_id' => $product->ID,
+                'product_name' => $product->Name,
+                'quantity' => $item->Quantity,
+                'price' => (float) $product->getDiscountPrice(),
+                'original_price' => (float) $product->Price,
+                'description' => $product->Description,
+                'subtotal' => (float) $item->getSubtotal(),
+                'weight' => $product->Weight,
+                'total_weight' => $product->Weight * $item->Quantity,
+                'stock' => $product->Stock,
+                'rating' => $product->getAverageRating(),
+                'image_url' => $product->Image()->exists() ? $product->Image()->getAbsoluteURL() : null,
+            ];
+
+            $subtotal += $item->getSubtotal();
+            $totalItems += $item->Quantity;
+            $totalWeight += ($product->Weight * $item->Quantity);
+        }
+
+        return $this->jsonResponse([
+            'success' => true,
+            'data' => [
+                'items' => $items,
+                'summary' => [
+                    'total_items' => $totalItems,
+                    'total_weight' => $totalWeight,
+                    'subtotal' => $subtotal,
+                    'formatted_subtotal' => 'Rp ' . number_format($subtotal, 0, '.', '.'),
+                ]
+            ]
+        ]);
+    }
+    public function addToCart(HTTPRequest $request)
+    {
+        if (!$request->isPOST()) {
+            return $this->jsonResponse(['error' => 'Only POST method allowed'], 405);
+        }
+
+        $member = $this->requireAuth();
+        if ($member instanceof HTTPResponse)
+            return $member;
+
+        $data = json_decode($request->getBody(), true);
+
+        if (!isset($data['product_id']) || !isset($data['quantity'])) {
+            return $this->jsonResponse(['error' => 'product_id and quantity are required'], 400);
+        }
+
+        $productID = (int) $data['product_id'];
+        $quantity = (int) $data['quantity'];
+
+        if ($quantity <= 0) {
+            return $this->jsonResponse(['error' => 'Quantity must be greater than 0'], 400);
+        }
+
+        $product = Product::get()->byID($productID);
+        if (!$product) {
+            return $this->jsonResponse(['error' => 'Product not found'], 404);
+        }
+
+        // Check stock
+        if ($product->Stock < $quantity) {
+            return $this->jsonResponse(['error' => 'Insufficient stock'], 400);
+        }
+
+        // Check if item already in cart
+        $cartItem = CartItem::get()->filter([
+            'MemberID' => $member->ID,
+            'ProductID' => $productID
+        ])->first();
+
+        if ($cartItem) {
+            // Update quantity
+            $newQuantity = $cartItem->Quantity + $quantity;
+
+            if ($product->Stock < $newQuantity) {
+                return $this->jsonResponse(['error' => 'Insufficient stock'], 400);
+            }
+
+            $cartItem->Quantity = $newQuantity;
+            $cartItem->write();
+        } else {
+            // Create new cart item
+            $cartItem = CartItem::create();
+            $cartItem->MemberID = $member->ID;
+            $cartItem->ProductID = $productID;
+            $cartItem->Quantity = $quantity;
+            $cartItem->write();
+        }
+
+        return $this->jsonResponse([
+            'success' => true,
+            'message' => 'Product added to cart',
+            'data' => [
+                'cart_item_id' => $cartItem->ID,
+                'quantity' => $cartItem->Quantity,
+            ]
+        ], 201);
+    }
+    public function updateCartItem(HTTPRequest $request)
+    {
+        if (!$request->isPUT()) {
+            return $this->jsonResponse(['error' => 'Only PUT method allowed'], 405);
+        }
+
+        $member = $this->requireAuth();
+        if ($member instanceof HTTPResponse)
+            return $member;
+
+        $cartItemID = $request->param('ID');
+        $data = json_decode($request->getBody(), true);
+
+        if (!isset($data['quantity'])) {
+            return $this->jsonResponse(['error' => 'quantity is required'], 400);
+        }
+
+        $quantity = (int) $data['quantity'];
+
+        if ($quantity <= 0) {
+            return $this->jsonResponse(['error' => 'Quantity must be greater than 0'], 400);
+        }
+
+        $cartItem = CartItem::get()->filter([
+            'ID' => $cartItemID,
+            'MemberID' => $member->ID
+        ])->first();
+
+        if (!$cartItem) {
+            return $this->jsonResponse(['error' => 'Cart item not found'], 404);
+        }
+
+        $product = $cartItem->Product();
+
+        if ($product->Stock < $quantity) {
+            return $this->jsonResponse(['error' => 'Insufficient stock'], 400);
+        }
+
+        $cartItem->Quantity = $quantity;
+        $cartItem->write();
+
+        return $this->jsonResponse([
+            'success' => true,
+            'message' => 'Cart item updated',
+            'data' => [
+                'cart_item_id' => $cartItem->ID,
+                'quantity' => $cartItem->Quantity,
+            ]
+        ]);
+    }
+    public function removeFromCart(HTTPRequest $request)
+    {
+        if (!$request->isDELETE()) {
+            return $this->jsonResponse(['error' => 'Only DELETE method allowed'], 405);
+        }
+
+        $member = $this->requireAuth();
+        if ($member instanceof HTTPResponse)
+            return $member;
+
+        $cartItemID = $request->param('ID');
+
+        $cartItem = CartItem::get()->filter([
+            'ID' => $cartItemID,
+            'MemberID' => $member->ID
+        ])->first();
+
+        if (!$cartItem) {
+            return $this->jsonResponse(['error' => 'Cart item not found'], 404);
+        }
+
+        $cartItem->delete();
+
+        return $this->jsonResponse([
+            'success' => true,
+            'message' => 'Item removed from cart'
+        ]);
+    }
+    public function clearCart(HTTPRequest $request)
+    {
+        if (!$request->isDELETE()) {
+            return $this->jsonResponse(['error' => 'Only DELETE method allowed'], 405);
+        }
+
+        $member = $this->requireAuth();
+        if ($member instanceof HTTPResponse)
+            return $member;
+
+        $cartItems = CartItem::get()->filter('MemberID', $member->ID);
+
+        foreach ($cartItems as $item) {
+            $item->delete();
+        }
+
+        return $this->jsonResponse([
+            'success' => true,
+            'message' => 'Cart cleared'
+        ]);
     }
 }
