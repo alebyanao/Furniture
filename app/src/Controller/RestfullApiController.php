@@ -37,6 +37,12 @@ class RestfullApiController extends Controller
         'updateCartItem',
         'removeFromCart',
         'clearCart',
+        //wishlist
+        'wishlists',
+        'addToWishlists',
+        'removeFromWishlists',
+        'checkWishlist', 
+        'toggleWishlist',
     ];
 
     private static $url_handlers = [
@@ -58,6 +64,12 @@ class RestfullApiController extends Controller
         'cart/remove/$ID!' => 'removeFromCart',
         'cart/clear' => 'clearCart',
         'cart' => 'cart',
+        // wishlist
+        'wishlists/add' => 'addToWishlists',
+        'wishlists/remove/$ID!' => 'removeFromWishlists',
+        'wishlists/check/$ID!' => 'checkWishlist',
+        'wishlists/toggle' => 'toggleWishlist', 
+        'wishlists' => 'wishlists', 
          
     ];
 
@@ -91,6 +103,20 @@ class RestfullApiController extends Controller
                     'GET /api/member' => 'Get current member profile',
                     'PUT /api/member' => 'Update member profile',
                     'PUT /api/member/password' => 'Update member password',
+                ],
+                 'catalog' => [
+                    'GET /api/siteconfig' => 'Get site configuration',
+                    // 'GET /api/popupad' => 'Get popup ads',
+                    'GET /api/category' => 'Get categories',
+                    'GET /api/products' => 'Get all products (with filters)',
+                    'GET /api/product/{id}' => 'Get product detail',
+                ],
+                'cart' => [
+                  'GET /api/cart' => 'Get cart items',
+                    'POST /api/cart/add' => 'Add item to cart',
+                    'PUT /api/cart/update/{id}' => 'Update cart item quantity',
+                    'DELETE /api/cart/remove/{id}' => 'Remove item from cart',
+                    'DELETE /api/cart/clear' => 'Clear all cart items',
                 ],
             ]
         ]);
@@ -735,5 +761,192 @@ class RestfullApiController extends Controller
             'success' => true,
             'message' => 'Cart cleared'
         ]);
+    }
+    // wishlist
+    public function wishlists(HTTPRequest $request)
+    {
+        if (!$request->isGET()) {
+            return $this->jsonResponse(['error' => 'Only GET method allowed'], 405);
+        }
+
+        $member = $this->requireAuth();
+        if ($member instanceof HTTPResponse)
+            return $member;
+
+        $wishlists = Wishlist::get()->filter('MemberID', $member->ID);
+
+        $items = [];
+        foreach ($wishlists as $wishlist) { 
+            $product = $wishlist->Product();
+
+            $items[] = [
+                'id' => $wishlist->ID, 
+                'product_id' => $product->ID,
+                'product_name' => $product->Name,
+                'price' => (float) $product->getDiscountPrice(),
+                'original_price' => (float) $product->Price,
+                'description' => $product->Description,
+                'stock' => $product->Stock, 
+                'rating' => $product->getAverageRating(),
+                'image_url' => $product->Image()->exists() ? $product->Image()->getAbsoluteURL() : null,
+            ];
+        }
+
+        return $this->jsonResponse([
+            'success' => true,
+            'data' => $items,
+            'total' => count($items)
+        ]);
+    }
+    public function addToWishlists(HTTPRequest $request)
+    {
+        if (!$request->isPOST()) {
+            return $this->jsonResponse(['error' => 'Only POST method allowed'], 405);
+        }
+
+        $member = $this->requireAuth();
+        if ($member instanceof HTTPResponse)
+            return $member;
+
+        $data = json_decode($request->getBody(), true);
+
+        if (!isset($data['product_id'])) {
+            return $this->jsonResponse(['error' => 'product_id is required'], 400);
+        }
+
+        $productID = (int) $data['product_id'];
+
+        $product = Product::get()->byID($productID);
+        if (!$product) {
+            return $this->jsonResponse(['error' => 'Product not found'], 404);
+        }
+
+        // Check if already in wishlist
+        $existing = Wishlist::get()->filter([
+            'MemberID' => $member->ID,
+            'ProductID' => $productID
+        ])->first();
+
+        if ($existing) {
+            return $this->jsonResponse(['error' => 'Product already in wishlist'], 400);
+        }
+
+        $wishlist = Wishlist::create();
+        $wishlist->MemberID = $member->ID;
+        $wishlist->ProductID = $productID;
+        $wishlist->write();
+
+        return $this->jsonResponse([
+            'success' => true,
+            'message' => 'Product added to wishlist',
+            'data' => [
+                'wishlist_id' => $wishlist->ID
+            ]
+        ], 201);
+    }
+    public function removeFromWishlists(HTTPRequest $request)
+    {
+        if (!$request->isDELETE()) {
+            return $this->jsonResponse(['error' => 'Only DELETE method allowed'], 405);
+        }
+
+        $member = $this->requireAuth();
+        if ($member instanceof HTTPResponse)
+            return $member;
+
+        $wishlistID = $request->param('ID'); // ✅ Variable ini sudah benar
+
+        $wishlist = Wishlist::get()->filter([
+            'ID' => $wishlistID, // ✅ Perbaiki dari $favoriteID
+            'MemberID' => $member->ID
+        ])->first();
+
+        if (!$wishlist) {
+            return $this->jsonResponse(['error' => 'Wishlist not found'], 404);
+        }
+
+        $wishlist->delete();
+
+        return $this->jsonResponse([
+            'success' => true,
+            'message' => 'Removed from wishlist' // ✅ Perbaiki dari Wishlists
+        ]);
+    }
+    public function checkWishlist(HTTPRequest $request)
+    {
+        if (!$request->isGET()) {
+            return $this->jsonResponse(['error' => 'Only GET method allowed'], 405);
+        }
+
+        $member = $this->requireAuth();
+        if ($member instanceof HTTPResponse)
+            return $member;
+
+        $productID = $request->param('ID');
+
+        $wishlist = Wishlist::get()->filter([
+            'MemberID' => $member->ID,
+            'ProductID' => $productID
+        ])->first();
+
+        return $this->jsonResponse([
+            'success' => true,
+            'in_wishlist' => $wishlist ? true : false,
+            'wishlist_id' => $wishlist ? $wishlist->ID : null
+        ]);
+    }
+    public function toggleWishlist(HTTPRequest $request)
+    {
+        if (!$request->isPOST()) {
+            return $this->jsonResponse(['error' => 'Only POST method allowed'], 405);
+        }
+
+        $member = $this->requireAuth();
+        if ($member instanceof HTTPResponse)
+            return $member;
+
+        $data = json_decode($request->getBody(), true);
+
+        if (!isset($data['product_id'])) {
+            return $this->jsonResponse(['error' => 'product_id is required'], 400);
+        }
+
+        $productID = (int) $data['product_id'];
+
+        $product = Product::get()->byID($productID);
+        if (!$product) {
+            return $this->jsonResponse(['error' => 'Product not found'], 404);
+        }
+
+        // Check if already in wishlist
+        $existing = Wishlist::get()->filter([
+            'MemberID' => $member->ID,
+            'ProductID' => $productID
+        ])->first();
+
+        if ($existing) {
+            // Remove from wishlist
+            $existing->delete();
+            return $this->jsonResponse([
+                'success' => true,
+                'action' => 'removed',
+                'message' => 'Product removed from wishlist',
+                'in_wishlist' => false
+            ]);
+        } else {
+            // Add to wishlist
+            $wishlist = Wishlist::create();
+            $wishlist->MemberID = $member->ID;
+            $wishlist->ProductID = $productID;
+            $wishlist->write();
+
+            return $this->jsonResponse([
+                'success' => true,
+                'action' => 'added',
+                'message' => 'Product added to wishlist',
+                'in_wishlist' => true,
+                'wishlist_id' => $wishlist->ID
+            ], 201);
+        }
     }
 }
